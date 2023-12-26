@@ -20,7 +20,7 @@ class DiffusersPipelineLoader:
     def INPUT_TYPES(s):
         return {"required": { "ckpt_name": (folder_paths.get_filename_list("checkpoints"), ), }}
 
-    RETURN_TYPES = ("PIPELINE",)
+    RETURN_TYPES = ("PIPELINE", "AUTOENCODER", "SCHEDULER",)
 
     FUNCTION = "create_pipeline"
 
@@ -40,7 +40,7 @@ class DiffusersPipelineLoader:
             torch_dtype=self.dtype,
             cache_dir=self.tmp_dir,
         )
-        return ((pipe, ckpt_cache_path),)
+        return ((pipe, ckpt_cache_path), pipe.vae, pipe.scheduler)
 
 class DiffusersVaeLoader:
     def __init__(self):
@@ -137,7 +137,7 @@ class DiffusersClipTextEncode:
         }}
 
     RETURN_TYPES = ("EMBEDS", "EMBEDS", )
-    RETURN_NAMES = ("positive", "negative", )
+    RETURN_NAMES = ("positive_embeds", "negative_embeds", )
 
     FUNCTION = "concat_embeds"
 
@@ -156,8 +156,8 @@ class DiffusersSampler:
     def INPUT_TYPES(s):
         return {"required": {
             "maked_pipeline": ("MAKED_PIPELINE", ),
-            "positive": ("EMBEDS", ),
-            "negative": ("EMBEDS", ),
+            "positive_embeds": ("EMBEDS", ),
+            "negative_embeds": ("EMBEDS", ),
             "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
             "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
             "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
@@ -171,14 +171,14 @@ class DiffusersSampler:
 
     CATEGORY = "Diffusers"
 
-    def sample(self, maked_pipeline, positive, negative, height, width, steps, cfg, seed):
+    def sample(self, maked_pipeline, positive_embeds, negative_embeds, height, width, steps, cfg, seed):
         images = maked_pipeline(
-            prompt_embeds=positive,
+            prompt_embeds=positive_embeds,
             height=height,
             width=width,
             num_inference_steps=steps,
             guidance_scale=cfg,
-            negative_prompt_embeds=negative,
+            negative_prompt_embeds=negative_embeds,
             generator=torch.Generator(self.torch_device).manual_seed(seed)
         ).images
         return (images,)
@@ -193,7 +193,7 @@ class DiffusersSaveImage:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": 
-                    {"images": ("PIL_IMAGE", ),
+                    {"pil_images": ("PIL_IMAGE", ),
                      "filename_prefix": ("STRING", {"default": "ComfyUI"})},
                 "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
                 }
@@ -205,12 +205,12 @@ class DiffusersSaveImage:
 
     CATEGORY = "Diffusers"
 
-    def save_images(self, images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
+    def save_images(self, pil_images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
         filename_prefix += self.prefix_append
-        width, height = images[0].size
+        width, height = pil_images[0].size
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, width, height)
         results = list()
-        for image in images:
+        for image in pil_images:
             metadata = None
             if not args.disable_metadata:
                 metadata = PngInfo()
