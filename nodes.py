@@ -9,7 +9,8 @@ from diffusers import StableDiffusionPipeline, AutoencoderKL
 from comfy.cli_args import args
 from PIL import Image, ImageOps, ImageSequence
 from PIL.PngImagePlugin import PngInfo
-
+from streamdiffusion import StreamDiffusion
+from streamdiffusion.image_utils import postprocess_image
 
 class DiffusersPipelineLoader:
     def __init__(self):
@@ -136,8 +137,8 @@ class DiffusersClipTextEncode:
             "negative": ("STRING", {"multiline": True}),
         }}
 
-    RETURN_TYPES = ("EMBEDS", "EMBEDS", )
-    RETURN_NAMES = ("positive_embeds", "negative_embeds", )
+    RETURN_TYPES = ("EMBEDS", "EMBEDS", "STRING", "STRING", )
+    RETURN_NAMES = ("positive_embeds", "negative_embeds", "positive", "negative", )
 
     FUNCTION = "concat_embeds"
 
@@ -146,7 +147,7 @@ class DiffusersClipTextEncode:
     def concat_embeds(self, maked_pipeline, positive, negative):
         positive_embeds, negative_embeds = token_auto_concat_embeds(maked_pipeline, positive,negative)
 
-        return (positive_embeds, negative_embeds, )
+        return (positive_embeds, negative_embeds, positive, negative, )
 
 class DiffusersSampler:
     def __init__(self):
@@ -231,6 +232,100 @@ class DiffusersSaveImage:
 
         return { "ui": { "images": results } }
 
+class StreamDiffusionCreateStream:
+    def __init__(self):
+        self.dtype = torch.float32
+        self.torch_device = get_torch_device()
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "maked_pipeline": ("MAKED_PIPELINE", ),
+                "autoencoder": ("AUTOENCODER", ),
+                "t_index_list_type": (["txt2image", "image2image"],  {"default": "txt2image"}),
+                "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
+                "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
+                "do_add_noise": ("BOOLEAN", {"default": True}),
+                "use_denoising_batch": ("BOOLEAN", {"default": True}),
+                "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
+                "cfg_type": (["none", "full", "self", "initialize"], {"default": "self"}),
+            }, 
+        }
+
+    RETURN_TYPES = ("STREAM",)
+    FUNCTION = "load_stream"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def load_stream(self, maked_pipeline, autoencoder, t_index_list_type, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type):
+        if t_index_list_type == "txt2image":
+            t_index_list = [0, 16, 32, 45]
+        elif t_index_list_type == "image2image":
+            t_index_list = [32, 45]
+        
+        stream = StreamDiffusion(
+            pipe = maked_pipeline,
+            t_index_list = t_index_list,
+            torch_dtype = self.dtype,
+            cfg_type = cfg_type,
+            width = width,
+            height = height,
+            do_add_noise = do_add_noise,
+            use_denoising_batch = use_denoising_batch,
+            frame_buffer_size = frame_buffer_size,
+        )
+        stream.load_lcm_lora()
+        stream.fuse_lora()
+        stream.vae = autoencoder.to(self.torch_device)
+        return ((stream, t_index_list), )
+
+class StreamDiffusionSampler:
+    def __init__(self):
+        self.torch_device = get_torch_device()
+        
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "stream": ("STREAM", ),
+                "positive": ("STRING", {"multiline": True}),
+                "negative": ("STRING", {"multiline": True}),
+                "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
+                "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
+                "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
+            },
+        }
+
+    RETURN_TYPES = ("PIL_IMAGE",)
+
+    FUNCTION = "sample"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num):
+        t_index_list = stream[1]
+        stream = stream[0]
+        stream.prepare(
+            prompt = positive,
+            negative_prompt = negative,
+            num_inference_steps = steps,
+            guidance_scale = cfg,
+            delta = delta,
+            seed = seed
+        )
+        
+        for _ in t_index_list:
+            stream()
+
+        result = []
+        for _ in range(num):
+            x_output = stream.txt2img()
+            result.append(postprocess_image(x_output, output_type="pil")[0])
+        return (result,)
+
 NODE_CLASS_MAPPINGS = {
     "DiffusersPipelineLoader": DiffusersPipelineLoader,
     "DiffusersVaeLoader": DiffusersVaeLoader,
@@ -238,7 +333,9 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersModelMakeup": DiffusersModelMakeup,
     "DiffusersClipTextEncode": DiffusersClipTextEncode,
     "DiffusersSampler": DiffusersSampler,
-    "DiffusersSaveImage": DiffusersSaveImage
+    "DiffusersSaveImage": DiffusersSaveImage,
+    "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
+    "StreamDiffusionSampler": StreamDiffusionSampler,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -248,5 +345,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersModelMakeup": "Diffusers Model Makeup",
     "DiffusersClipTextEncode": "Diffusers Clip Text Encode",
     "DiffusersSampler": "Diffusers Sampler",
-    "DiffusersSaveImage": "Diffusers Save Image"
+    "DiffusersSaveImage": "Diffusers Save Image",
+    "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
+    "StreamDiffusionSampler": "StreamDiffusion Sampler",
 }
