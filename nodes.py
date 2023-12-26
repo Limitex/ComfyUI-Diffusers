@@ -291,7 +291,7 @@ class StreamDiffusionSampler:
                 "stream": ("STREAM", ),
                 "positive": ("STRING", {"multiline": True}),
                 "negative": ("STRING", {"multiline": True}),
-                "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
+                "steps": ("INT", {"default": 50, "min": 1, "max": 10000}),
                 "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
                 "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
