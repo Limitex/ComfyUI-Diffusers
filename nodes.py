@@ -108,8 +108,8 @@ class DiffusersModelMakeup:
         return {
             "required": {
                 "pipeline": ("PIPELINE", ), 
-                "autoencoder": ("AUTOENCODER", ),
                 "scheduler": ("SCHEDULER", ),
+                "autoencoder": ("AUTOENCODER", ),
             }, 
         }
 
@@ -119,7 +119,7 @@ class DiffusersModelMakeup:
 
     CATEGORY = "Diffusers"
 
-    def makeup_pipeline(self, pipeline, autoencoder, scheduler):
+    def makeup_pipeline(self, pipeline, scheduler, autoencoder):
         pipeline = pipeline[0]
         pipeline.vae = autoencoder
         pipeline.scheduler = scheduler
