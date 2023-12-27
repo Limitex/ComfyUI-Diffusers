@@ -249,7 +249,7 @@ class StreamDiffusionCreateStream:
                 "do_add_noise": ("BOOLEAN", {"default": True}),
                 "use_denoising_batch": ("BOOLEAN", {"default": True}),
                 "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
-                "cfg_type": (["none", "full", "self", "initialize"], {"default": "self"}),
+                "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
             }, 
         }
 
@@ -268,12 +268,12 @@ class StreamDiffusionCreateStream:
             pipe = maked_pipeline,
             t_index_list = t_index_list,
             torch_dtype = self.dtype,
-            cfg_type = cfg_type,
             width = width,
             height = height,
             do_add_noise = do_add_noise,
             use_denoising_batch = use_denoising_batch,
             frame_buffer_size = frame_buffer_size,
+            cfg_type = cfg_type,
         )
         stream.load_lcm_lora()
         stream.fuse_lora()
