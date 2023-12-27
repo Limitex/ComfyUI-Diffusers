@@ -232,6 +232,9 @@ class DiffusersSaveImage:
 
         return { "ui": { "images": results } }
 
+
+# - Stream Diffusion -
+
 class StreamDiffusionCreateStream:
     def __init__(self):
         self.dtype = torch.float32
@@ -325,6 +328,9 @@ class StreamDiffusionSampler:
             x_output = stream.txt2img()
             result.append(postprocess_image(x_output, output_type="pil")[0])
         return (result,)
+
+# - - - - - - - - - - - - - - - - - -
+
 
 NODE_CLASS_MAPPINGS = {
     "DiffusersPipelineLoader": DiffusersPipelineLoader,
