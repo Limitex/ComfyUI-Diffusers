@@ -1,4 +1,5 @@
 import json
+import copy
 import os
 from .utils import SCHEDULERS, token_auto_concat_embeds, vae_pt_to_vae_diffuser
 import numpy as np
@@ -262,6 +263,7 @@ class StreamDiffusionCreateStream:
     CATEGORY = "Diffusers/StreamDiffusion"
 
     def load_stream(self, maked_pipeline, autoencoder, t_index_list_type, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type):
+        maked_pipeline = copy.deepcopy(maked_pipeline)
         if t_index_list_type == "txt2image":
             t_index_list = [0, 16, 32, 45]
         elif t_index_list_type == "image2image":
