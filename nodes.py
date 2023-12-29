@@ -310,9 +310,9 @@ class StreamDiffusionSampler:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num):
+    def sample(self, stream, positive, negative, steps, cfg, delta, seed, num):
         t_index_list = stream[1]
-        stream = stream[0]
+        stream: StreamDiffusion = stream[0]
         stream.prepare(
             prompt = positive,
             negative_prompt = negative,
@@ -324,6 +324,72 @@ class StreamDiffusionSampler:
         
         for _ in t_index_list:
             stream()
+
+        result = []
+        for _ in range(num):
+            x_output = stream.txt2img()
+            result.append(postprocess_image(x_output, output_type="pil")[0])
+        return (result,)
+
+class StreamDiffusionWarmup:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "stream": ("STREAM", ),
+                "negative": ("STRING", {"multiline": True}),
+                "steps": ("INT", {"default": 50, "min": 1, "max": 10000}),
+                "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
+                "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            },
+        }
+
+    RETURN_TYPES = ("WARMUP_STREAM",)
+
+    FUNCTION = "warmup"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def warmup(self, stream, negative, steps, cfg, delta, seed):
+        t_index_list = stream[1]
+        stream: StreamDiffusion = stream[0]
+        stream.prepare(
+            prompt="",
+            negative_prompt=negative,
+            num_inference_steps = steps,
+            guidance_scale = cfg,
+            delta = delta,
+            seed = seed
+        )
+        
+        for _ in t_index_list:
+            stream()
+        
+        return (stream, )
+
+
+class StreamDiffusionFastSampler:  
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "warmup_stream": ("WARMUP_STREAM", ),
+                "positive": ("STRING", {"multiline": True}),
+                "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
+            },
+        }
+
+    RETURN_TYPES = ("PIL_IMAGE",)
+
+    FUNCTION = "sample"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def sample(self, warmup_stream, positive, num):
+        stream: StreamDiffusion = warmup_stream
+        
+        stream.update_prompt(positive)
 
         result = []
         for _ in range(num):
@@ -344,6 +410,8 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersSaveImage": DiffusersSaveImage,
     "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
     "StreamDiffusionSampler": StreamDiffusionSampler,
+    "StreamDiffusionWarmup": StreamDiffusionWarmup,
+    "StreamDiffusionFastSampler": StreamDiffusionFastSampler,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -356,4 +424,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersSaveImage": "Diffusers Save Image",
     "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
     "StreamDiffusionSampler": "StreamDiffusion Sampler",
+    "StreamDiffusionWarmup": "StreamDiffusion Warmup",
+    "StreamDiffusionFastSampler": "StreamDiffusion Fast Sampler",
 }
