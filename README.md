@@ -4,16 +4,20 @@ This repository is a custom node in ComfyUI.
 
 ## Overview
 
-
 This is a program that allows you to use Huggingface Diffusers module with ComfyUI. Additionally, Stream Diffusion is also available.
 
 ![Workflow](img/workflow.png)
+
+In addition, real-time generation is possible by doing the following.
+When running, please enable Auto Queue in Extra options.
+
+![Workflow2](img/workflow2.png)
 
 ## Usage
 
 Run the following command inside ComfyUI/custom_nodes.
 
-```
+```cmd
 git clone https://github.com/Limitex/ComfyUI-Diffusers.git
 cd ComfyUI-Diffusers
 pip install -r requirements.txt
@@ -39,4 +43,6 @@ pip install -r requirements.txt
 
 ### StreamDiffusion Sampler (StreamDiffusionSampler)
 
+### StreamDiffusion Warmup (StreamDiffusionWarmup)
 
+### StreamDiffusion Fast Sampler (StreamDiffusionFastSampler)
