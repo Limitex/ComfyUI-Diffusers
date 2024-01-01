@@ -299,7 +299,7 @@ class StreamDiffusionCreateStream:
         stream.load_lcm_lora()
         stream.fuse_lora()
         stream.vae = autoencoder.to(self.torch_device)
-        return ((stream, t_index_list), )
+        return (stream, )
 
 class StreamDiffusionSampler:
     def __init__(self):
@@ -317,6 +317,7 @@ class StreamDiffusionSampler:
                 "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
+                "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
             },
         }
 
@@ -326,9 +327,7 @@ class StreamDiffusionSampler:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def sample(self, stream, positive, negative, steps, cfg, delta, seed, num):
-        t_index_list = stream[1]
-        stream: StreamDiffusion = stream[0]
+    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num, warmup):
         stream.prepare(
             prompt = positive,
             negative_prompt = negative,
@@ -338,7 +337,7 @@ class StreamDiffusionSampler:
             seed = seed
         )
         
-        for _ in t_index_list:
+        for _ in range(warmup):
             stream()
 
         result = []
@@ -358,18 +357,17 @@ class StreamDiffusionWarmup:
                 "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
                 "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
             },
         }
 
     RETURN_TYPES = ("WARMUP_STREAM",)
 
-    FUNCTION = "warmup"
+    FUNCTION = "stream_warmup"
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def warmup(self, stream, negative, steps, cfg, delta, seed):
-        t_index_list = stream[1]
-        stream: StreamDiffusion = stream[0]
+    def stream_warmup(self, stream: StreamDiffusion, negative, steps, cfg, delta, seed, warmup):
         stream.prepare(
             prompt="",
             negative_prompt=negative,
@@ -379,7 +377,7 @@ class StreamDiffusionWarmup:
             seed = seed
         )
         
-        for _ in t_index_list:
+        for _ in range(warmup):
             stream()
         
         return (stream, )
