@@ -280,7 +280,6 @@ class StreamDiffusionCreateStream:
         return {
             "required": {
                 "maked_pipeline": ("MAKED_PIPELINE", ),
-                "autoencoder": ("AUTOENCODER", ),
                 "t_index_list": ("LIST", ),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
@@ -298,7 +297,7 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, autoencoder, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora):
+    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora):
         maked_pipeline = copy.deepcopy(maked_pipeline)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
@@ -313,7 +312,7 @@ class StreamDiffusionCreateStream:
         )
         stream.load_lcm_lora(lcm_lora)
         stream.fuse_lora()
-        stream.vae = autoencoder.to(self.torch_device)
+        stream.vae = maked_pipeline.vae.to(self.torch_device)
         
         if xformers_memory_efficient_attention:
             maked_pipeline.enable_xformers_memory_efficient_attention()
