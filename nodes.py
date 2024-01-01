@@ -12,6 +12,7 @@ from PIL import Image, ImageOps, ImageSequence
 from PIL.PngImagePlugin import PngInfo
 from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
+from safetensors.torch import load_file
 
 class DiffusersPipelineLoader:
     def __init__(self):
@@ -233,7 +234,6 @@ class DiffusersSaveImage:
 
         return { "ui": { "images": results } }
 
-
 # - Stream Diffusion -
 
 class CreateIntListNode:
@@ -257,6 +257,19 @@ class CreateIntListNode:
     def create_list(self, elements_count, **kwargs):
         return ([value for key, value in kwargs.items()][:elements_count], )
 
+class LcmLoraLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "lora_name": (folder_paths.get_filename_list("loras"), ), }}
+
+    RETURN_TYPES = ("LCM_LORA",)
+    FUNCTION = "load_lora"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def load_lora(self, lora_name):
+        return (load_file(folder_paths.get_full_path("loras", lora_name)), )
+
 class StreamDiffusionCreateStream:
     def __init__(self):
         self.dtype = torch.float32
@@ -276,6 +289,7 @@ class StreamDiffusionCreateStream:
                 "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
                 "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
                 "xformers_memory_efficient_attention": ("BOOLEAN", {"default": False}),
+                "lcm_lora" : ("LCM_LORA", )
             }, 
         }
 
@@ -284,7 +298,7 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, autoencoder, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention):
+    def load_stream(self, maked_pipeline, autoencoder, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora):
         maked_pipeline = copy.deepcopy(maked_pipeline)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
@@ -297,7 +311,7 @@ class StreamDiffusionCreateStream:
             frame_buffer_size = frame_buffer_size,
             cfg_type = cfg_type,
         )
-        stream.load_lcm_lora()
+        stream.load_lcm_lora(lcm_lora)
         stream.fuse_lora()
         stream.vae = autoencoder.to(self.torch_device)
         
@@ -427,6 +441,7 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersSampler": DiffusersSampler,
     "DiffusersSaveImage": DiffusersSaveImage,
     "CreateIntListNode": CreateIntListNode,
+    "LcmLoraLoader": LcmLoraLoader,
     "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
     "StreamDiffusionSampler": StreamDiffusionSampler,
     "StreamDiffusionWarmup": StreamDiffusionWarmup,
@@ -442,6 +457,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersSampler": "Diffusers Sampler",
     "DiffusersSaveImage": "Diffusers Save Image",
     "CreateIntListNode": "Create Int List",
+    "LcmLoraLoader": "LCM Lora Loader",
     "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
     "StreamDiffusionSampler": "StreamDiffusion Sampler",
     "StreamDiffusionWarmup": "StreamDiffusion Warmup",
