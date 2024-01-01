@@ -236,6 +236,27 @@ class DiffusersSaveImage:
 
 # - Stream Diffusion -
 
+class CreateIntListNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        max_element = 10
+        return {
+            "required": {
+                "elements_count" : ("INT", {"default": 2, "min": 1, "max": max_element, "step": 1}),
+            }, 
+            "optional": {
+                f"element_{i}": ("INT", {"default": 0}) for i in range(1, max_element)
+            }
+        }
+
+    RETURN_TYPES = ("LIST",)
+    FUNCTION = "create_list"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def create_list(self, elements_count, **kwargs):
+        return ([value for key, value in kwargs.items()][:elements_count], )
+
 class StreamDiffusionCreateStream:
     def __init__(self):
         self.dtype = torch.float32
@@ -247,7 +268,7 @@ class StreamDiffusionCreateStream:
             "required": {
                 "maked_pipeline": ("MAKED_PIPELINE", ),
                 "autoencoder": ("AUTOENCODER", ),
-                "t_index_list_type": (["txt2image", "image2image"],  {"default": "txt2image"}),
+                "t_index_list": ("LIST", ),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "do_add_noise": ("BOOLEAN", {"default": True}),
@@ -262,13 +283,8 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, autoencoder, t_index_list_type, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type):
+    def load_stream(self, maked_pipeline, autoencoder, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type):
         maked_pipeline = copy.deepcopy(maked_pipeline)
-        if t_index_list_type == "txt2image":
-            t_index_list = [0, 16, 32, 45]
-        elif t_index_list_type == "image2image":
-            t_index_list = [32, 45]
-        
         stream = StreamDiffusion(
             pipe = maked_pipeline,
             t_index_list = t_index_list,
@@ -408,6 +424,7 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersClipTextEncode": DiffusersClipTextEncode,
     "DiffusersSampler": DiffusersSampler,
     "DiffusersSaveImage": DiffusersSaveImage,
+    "CreateIntListNode": CreateIntListNode,
     "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
     "StreamDiffusionSampler": StreamDiffusionSampler,
     "StreamDiffusionWarmup": StreamDiffusionWarmup,
@@ -422,6 +439,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersClipTextEncode": "Diffusers Clip Text Encode",
     "DiffusersSampler": "Diffusers Sampler",
     "DiffusersSaveImage": "Diffusers Save Image",
+    "CreateIntListNode": "Create Int List",
     "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
     "StreamDiffusionSampler": "StreamDiffusion Sampler",
     "StreamDiffusionWarmup": "StreamDiffusion Warmup",
