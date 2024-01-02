@@ -3,7 +3,6 @@ import argparse
 import io
 
 import requests
-import torch
 from omegaconf import OmegaConf
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     assign_to_checkpoint,
@@ -12,6 +11,10 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     renew_vae_attention_paths,
     renew_vae_resnet_paths,
 )
+from PIL import Image
+from torchvision.transforms import ToTensor
+import numpy as np
+
 
 from diffusers import (
     AutoencoderKL,
@@ -202,3 +205,7 @@ def vae_pt_to_vae_diffuser(
     vae = AutoencoderKL(**vae_config)
     vae.load_state_dict(converted_vae_checkpoint)
     vae.save_pretrained(output_path)
+
+
+def convert_images_to_tensors(images):
+    return torch.stack([np.transpose(ToTensor()(image), (1, 2, 0)) for image in images])

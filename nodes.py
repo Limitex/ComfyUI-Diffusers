@@ -1,7 +1,7 @@
 import json
 import copy
 import os
-from .utils import SCHEDULERS, token_auto_concat_embeds, vae_pt_to_vae_diffuser
+from .utils import SCHEDULERS, convert_images_to_tensors, token_auto_concat_embeds, vae_pt_to_vae_diffuser
 import numpy as np
 import torch
 from comfy.model_management import get_torch_device, get_torch_device_name
@@ -168,7 +168,7 @@ class DiffusersSampler:
             "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
         }}
 
-    RETURN_TYPES = ("PIL_IMAGE",)
+    RETURN_TYPES = ("IMAGE",)
 
     FUNCTION = "sample"
 
@@ -184,55 +184,7 @@ class DiffusersSampler:
             negative_prompt_embeds=negative_embeds,
             generator=torch.Generator(self.torch_device).manual_seed(seed)
         ).images
-        return (images,)
-
-class DiffusersSaveImage:
-    def __init__(self):
-        self.output_dir = folder_paths.get_output_directory()
-        self.type = "output"
-        self.prefix_append = ""
-        self.compress_level = 4
-
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": 
-                    {"pil_images": ("PIL_IMAGE", ),
-                     "filename_prefix": ("STRING", {"default": "ComfyUI"})},
-                "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
-                }
-
-    RETURN_TYPES = ()
-    FUNCTION = "save_images"
-
-    OUTPUT_NODE = True
-
-    CATEGORY = "Diffusers"
-
-    def save_images(self, pil_images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
-        filename_prefix += self.prefix_append
-        width, height = pil_images[0].size
-        full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, width, height)
-        results = list()
-        for image in pil_images:
-            metadata = None
-            if not args.disable_metadata:
-                metadata = PngInfo()
-                if prompt is not None:
-                    metadata.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for x in extra_pnginfo:
-                        metadata.add_text(x, json.dumps(extra_pnginfo[x]))
-
-            file = f"{filename}_{counter:05}_.png"
-            image.save(os.path.join(full_output_folder, file), pnginfo=metadata, compress_level=self.compress_level)
-            results.append({
-                "filename": file,
-                "subfolder": subfolder,
-                "type": self.type
-            })
-            counter += 1
-
-        return { "ui": { "images": results } }
+        return (convert_images_to_tensors(images),)
 
 # - Stream Diffusion -
 
@@ -348,7 +300,7 @@ class StreamDiffusionSampler:
             },
         }
 
-    RETURN_TYPES = ("PIL_IMAGE",)
+    RETURN_TYPES = ("IMAGE",)
 
     FUNCTION = "sample"
 
@@ -371,7 +323,7 @@ class StreamDiffusionSampler:
         for _ in range(num):
             x_output = stream.txt2img()
             result.append(postprocess_image(x_output, output_type="pil")[0])
-        return (result,)
+        return (convert_images_to_tensors(result),)
 
 class StreamDiffusionWarmup:
     @classmethod
@@ -421,7 +373,7 @@ class StreamDiffusionFastSampler:
             },
         }
 
-    RETURN_TYPES = ("PIL_IMAGE",)
+    RETURN_TYPES = ("IMAGE",)
 
     FUNCTION = "sample"
 
@@ -436,7 +388,7 @@ class StreamDiffusionFastSampler:
         for _ in range(num):
             x_output = stream.txt2img()
             result.append(postprocess_image(x_output, output_type="pil")[0])
-        return (result,)
+        return (convert_images_to_tensors(result),)
 
 # - - - - - - - - - - - - - - - - - -
 
@@ -448,7 +400,6 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersModelMakeup": DiffusersModelMakeup,
     "DiffusersClipTextEncode": DiffusersClipTextEncode,
     "DiffusersSampler": DiffusersSampler,
-    "DiffusersSaveImage": DiffusersSaveImage,
     "CreateIntListNode": CreateIntListNode,
     "LcmLoraLoader": LcmLoraLoader,
     "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
@@ -464,7 +415,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersModelMakeup": "Diffusers Model Makeup",
     "DiffusersClipTextEncode": "Diffusers Clip Text Encode",
     "DiffusersSampler": "Diffusers Sampler",
-    "DiffusersSaveImage": "Diffusers Save Image",
     "CreateIntListNode": "Create Int List",
     "LcmLoraLoader": "LCM Lora Loader",
     "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
