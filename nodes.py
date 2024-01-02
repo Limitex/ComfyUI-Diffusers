@@ -301,6 +301,7 @@ class StreamDiffusionCreateStream:
 
     def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora, tiny_vae):
         maked_pipeline = copy.deepcopy(maked_pipeline)
+        lcm_lora = copy.deepcopy(lcm_lora)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
             t_index_list = t_index_list,
