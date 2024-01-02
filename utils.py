@@ -1,9 +1,9 @@
-import torch
-import argparse
 import io
-
+import torch
 import requests
+import numpy as np
 from omegaconf import OmegaConf
+from torchvision.transforms import ToTensor
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     assign_to_checkpoint,
     conv_attn_to_linear,
@@ -11,11 +11,6 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     renew_vae_attention_paths,
     renew_vae_resnet_paths,
 )
-from PIL import Image
-from torchvision.transforms import ToTensor
-import numpy as np
-
-
 from diffusers import (
     AutoencoderKL,
     DDIMScheduler,

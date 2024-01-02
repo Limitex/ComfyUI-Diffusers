@@ -1,18 +1,14 @@
-import json
 import copy
 import os
-from .utils import SCHEDULERS, convert_images_to_tensors, token_auto_concat_embeds, vae_pt_to_vae_diffuser
-import numpy as np
 import torch
-from comfy.model_management import get_torch_device, get_torch_device_name
+from safetensors.torch import load_file
+from .utils import SCHEDULERS, convert_images_to_tensors, token_auto_concat_embeds, vae_pt_to_vae_diffuser
+from comfy.model_management import get_torch_device
 import folder_paths
-from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
-from comfy.cli_args import args
-from PIL import Image, ImageOps, ImageSequence
-from PIL.PngImagePlugin import PngInfo
 from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
-from safetensors.torch import load_file
+from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
+
 
 class DiffusersPipelineLoader:
     def __init__(self):
