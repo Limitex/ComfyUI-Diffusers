@@ -41,6 +41,10 @@ python -m streamdiffusion.tools.install-tensorrt
 
 ### Diffusers Save Image (DiffusersSaveImage)
 
+### Create Int List (CreateIntListNode)
+
+### LcmLoraLoader (LcmLoraLoader)
+
 ### StreamDiffusion Create Stream (StreamDiffusionCreateStream)
 
 ### StreamDiffusion Sampler (StreamDiffusionSampler)
