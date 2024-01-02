@@ -70,7 +70,7 @@ def token_auto_concat_embeds(pipe, positive, negative):
     negative_prompt_embeds = torch.cat(negative_concat_embeds, dim=1)
     return positive_prompt_embeds, negative_prompt_embeds
 
-
+# Reference from : https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
 def custom_convert_ldm_vae_checkpoint(checkpoint, config):
     vae_state_dict = checkpoint
 
@@ -171,7 +171,7 @@ def custom_convert_ldm_vae_checkpoint(checkpoint, config):
     conv_attn_to_linear(new_checkpoint)
     return new_checkpoint
 
-
+# Reference from : https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
 def vae_pt_to_vae_diffuser(
     checkpoint_path: str,
     output_path: str,

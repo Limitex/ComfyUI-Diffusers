@@ -6,12 +6,13 @@ import numpy as np
 import torch
 from comfy.model_management import get_torch_device, get_torch_device_name
 import folder_paths
-from diffusers import StableDiffusionPipeline, AutoencoderKL
+from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
 from comfy.cli_args import args
 from PIL import Image, ImageOps, ImageSequence
 from PIL.PngImagePlugin import PngInfo
 from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
+from safetensors.torch import load_file
 
 class DiffusersPipelineLoader:
     def __init__(self):
@@ -233,27 +234,63 @@ class DiffusersSaveImage:
 
         return { "ui": { "images": results } }
 
-
 # - Stream Diffusion -
+
+class CreateIntListNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        max_element = 10
+        return {
+            "required": {
+                "elements_count" : ("INT", {"default": 2, "min": 1, "max": max_element, "step": 1}),
+            }, 
+            "optional": {
+                f"element_{i}": ("INT", {"default": 0}) for i in range(1, max_element)
+            }
+        }
+
+    RETURN_TYPES = ("LIST",)
+    FUNCTION = "create_list"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def create_list(self, elements_count, **kwargs):
+        return ([value for key, value in kwargs.items()][:elements_count], )
+
+class LcmLoraLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "lora_name": (folder_paths.get_filename_list("loras"), ), }}
+
+    RETURN_TYPES = ("LCM_LORA",)
+    FUNCTION = "load_lora"
+
+    CATEGORY = "Diffusers/StreamDiffusion"
+
+    def load_lora(self, lora_name):
+        return (load_file(folder_paths.get_full_path("loras", lora_name)), )
 
 class StreamDiffusionCreateStream:
     def __init__(self):
         self.dtype = torch.float32
         self.torch_device = get_torch_device()
+        self.tmp_dir = folder_paths.get_temp_directory()
 
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
                 "maked_pipeline": ("MAKED_PIPELINE", ),
-                "autoencoder": ("AUTOENCODER", ),
-                "t_index_list_type": (["txt2image", "image2image"],  {"default": "txt2image"}),
+                "t_index_list": ("LIST", ),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "do_add_noise": ("BOOLEAN", {"default": True}),
                 "use_denoising_batch": ("BOOLEAN", {"default": True}),
                 "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
                 "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
+                "xformers_memory_efficient_attention": ("BOOLEAN", {"default": False}),
+                "lcm_lora" : ("LCM_LORA", ),
+                "tiny_vae" : ("STRING", {"default": "madebyollin/taesd"})
             }, 
         }
 
@@ -262,13 +299,9 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, autoencoder, t_index_list_type, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type):
+    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora, tiny_vae):
         maked_pipeline = copy.deepcopy(maked_pipeline)
-        if t_index_list_type == "txt2image":
-            t_index_list = [0, 16, 32, 45]
-        elif t_index_list_type == "image2image":
-            t_index_list = [32, 45]
-        
+        lcm_lora = copy.deepcopy(lcm_lora)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
             t_index_list = t_index_list,
@@ -280,10 +313,20 @@ class StreamDiffusionCreateStream:
             frame_buffer_size = frame_buffer_size,
             cfg_type = cfg_type,
         )
-        stream.load_lcm_lora()
+        stream.load_lcm_lora(lcm_lora)
         stream.fuse_lora()
-        stream.vae = autoencoder.to(self.torch_device)
-        return ((stream, t_index_list), )
+        stream.vae = AutoencoderTiny.from_pretrained(
+            pretrained_model_name_or_path=tiny_vae,
+            torch_dtype=self.dtype,
+            cache_dir=self.tmp_dir,
+        ).to(
+            device=maked_pipeline.device, 
+            dtype=maked_pipeline.dtype
+        )
+        
+        if xformers_memory_efficient_attention:
+            maked_pipeline.enable_xformers_memory_efficient_attention()
+        return (stream, )
 
 class StreamDiffusionSampler:
     def __init__(self):
@@ -301,6 +344,7 @@ class StreamDiffusionSampler:
                 "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
+                "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
             },
         }
 
@@ -310,9 +354,7 @@ class StreamDiffusionSampler:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def sample(self, stream, positive, negative, steps, cfg, delta, seed, num):
-        t_index_list = stream[1]
-        stream: StreamDiffusion = stream[0]
+    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num, warmup):
         stream.prepare(
             prompt = positive,
             negative_prompt = negative,
@@ -322,7 +364,7 @@ class StreamDiffusionSampler:
             seed = seed
         )
         
-        for _ in t_index_list:
+        for _ in range(warmup):
             stream()
 
         result = []
@@ -342,18 +384,17 @@ class StreamDiffusionWarmup:
                 "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
                 "delta": ("FLOAT", {"default": 1, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
             },
         }
 
     RETURN_TYPES = ("WARMUP_STREAM",)
 
-    FUNCTION = "warmup"
+    FUNCTION = "stream_warmup"
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def warmup(self, stream, negative, steps, cfg, delta, seed):
-        t_index_list = stream[1]
-        stream: StreamDiffusion = stream[0]
+    def stream_warmup(self, stream: StreamDiffusion, negative, steps, cfg, delta, seed, warmup):
         stream.prepare(
             prompt="",
             negative_prompt=negative,
@@ -363,7 +404,7 @@ class StreamDiffusionWarmup:
             seed = seed
         )
         
-        for _ in t_index_list:
+        for _ in range(warmup):
             stream()
         
         return (stream, )
@@ -408,6 +449,8 @@ NODE_CLASS_MAPPINGS = {
     "DiffusersClipTextEncode": DiffusersClipTextEncode,
     "DiffusersSampler": DiffusersSampler,
     "DiffusersSaveImage": DiffusersSaveImage,
+    "CreateIntListNode": CreateIntListNode,
+    "LcmLoraLoader": LcmLoraLoader,
     "StreamDiffusionCreateStream": StreamDiffusionCreateStream,
     "StreamDiffusionSampler": StreamDiffusionSampler,
     "StreamDiffusionWarmup": StreamDiffusionWarmup,
@@ -422,6 +465,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DiffusersClipTextEncode": "Diffusers Clip Text Encode",
     "DiffusersSampler": "Diffusers Sampler",
     "DiffusersSaveImage": "Diffusers Save Image",
+    "CreateIntListNode": "Create Int List",
+    "LcmLoraLoader": "LCM Lora Loader",
     "StreamDiffusionCreateStream": "StreamDiffusion Create Stream",
     "StreamDiffusionSampler": "StreamDiffusion Sampler",
     "StreamDiffusionWarmup": "StreamDiffusion Warmup",
