@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from comfy.model_management import get_torch_device, get_torch_device_name
 import folder_paths
-from diffusers import StableDiffusionPipeline, AutoencoderKL
+from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
 from comfy.cli_args import args
 from PIL import Image, ImageOps, ImageSequence
 from PIL.PngImagePlugin import PngInfo
@@ -274,6 +274,7 @@ class StreamDiffusionCreateStream:
     def __init__(self):
         self.dtype = torch.float32
         self.torch_device = get_torch_device()
+        self.tmp_dir = folder_paths.get_temp_directory()
 
     @classmethod
     def INPUT_TYPES(s):
@@ -288,7 +289,8 @@ class StreamDiffusionCreateStream:
                 "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
                 "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
                 "xformers_memory_efficient_attention": ("BOOLEAN", {"default": False}),
-                "lcm_lora" : ("LCM_LORA", )
+                "lcm_lora" : ("LCM_LORA", ),
+                "tiny_vae" : ("STRING", {"default": "madebyollin/taesd"})
             }, 
         }
 
@@ -297,7 +299,7 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora):
+    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora, tiny_vae):
         maked_pipeline = copy.deepcopy(maked_pipeline)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
@@ -312,7 +314,14 @@ class StreamDiffusionCreateStream:
         )
         stream.load_lcm_lora(lcm_lora)
         stream.fuse_lora()
-        stream.vae = maked_pipeline.vae.to(self.torch_device)
+        stream.vae = AutoencoderTiny.from_pretrained(
+            pretrained_model_name_or_path=tiny_vae,
+            torch_dtype=self.dtype,
+            cache_dir=self.tmp_dir,
+        ).to(
+            device=maked_pipeline.device, 
+            dtype=maked_pipeline.dtype
+        )
         
         if xformers_memory_efficient_attention:
             maked_pipeline.enable_xformers_memory_efficient_attention()
