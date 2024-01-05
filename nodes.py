@@ -2,7 +2,7 @@ import copy
 import os
 import torch
 from safetensors.torch import load_file
-from .utils import SCHEDULERS, convert_images_to_tensors, token_auto_concat_embeds, vae_pt_to_vae_diffuser
+from .utils import SCHEDULERS, token_auto_concat_embeds, vae_pt_to_vae_diffuser, convert_images_to_tensors, convert_tensors_to_images, resize_images
 from comfy.model_management import get_torch_device
 import folder_paths
 from streamdiffusion import StreamDiffusion
@@ -294,6 +294,9 @@ class StreamDiffusionSampler:
                 "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
                 "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
             },
+            "optional" : {
+                "image" : ("IMAGE", )
+            }
         }
 
     RETURN_TYPES = ("IMAGE",)
@@ -302,7 +305,7 @@ class StreamDiffusionSampler:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num, warmup):
+    def sample(self, stream: StreamDiffusion, positive, negative, steps, cfg, delta, seed, num, warmup, image = None):
         stream.prepare(
             prompt = positive,
             negative_prompt = negative,
@@ -312,13 +315,25 @@ class StreamDiffusionSampler:
             seed = seed
         )
         
+        if image != None:
+            image = convert_tensors_to_images(image)
+            image = resize_images(image, (stream.width, stream.height))
+            
         for _ in range(warmup):
             stream()
 
         result = []
         for _ in range(num):
-            x_output = stream.txt2img()
-            result.append(postprocess_image(x_output, output_type="pil")[0])
+            x_outputs = []
+            if image is None:
+                x_outputs.append(stream.txt2img())
+            else:
+                stream(image[0])
+                for i in image[1:] + image[-1:]:
+                    x_outputs.append(stream(i))
+            for x_output in x_outputs:
+                result.append(postprocess_image(x_output, output_type="pil")[0])
+        
         return (convert_images_to_tensors(result),)
 
 class StreamDiffusionWarmup:
