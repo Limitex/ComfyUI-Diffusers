@@ -2,6 +2,7 @@ import io
 import torch
 import requests
 import numpy as np
+from PIL import Image
 from omegaconf import OmegaConf
 from torchvision.transforms import ToTensor
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
@@ -202,5 +203,11 @@ def vae_pt_to_vae_diffuser(
     vae.save_pretrained(output_path)
 
 
-def convert_images_to_tensors(images):
+def convert_images_to_tensors(images: list[Image.Image]):
     return torch.stack([np.transpose(ToTensor()(image), (1, 2, 0)) for image in images])
+
+def convert_tensors_to_images(images: torch.tensor):
+    return [Image.fromarray(np.clip(255. * image.cpu().numpy(), 0, 255).astype(np.uint8)) for image in images]
+
+def resize_images(images: list[Image.Image], size: tuple[int, int]):
+    return [image.resize(size) for image in images]
