@@ -24,6 +24,9 @@ pip install -r requirements.txt
 git clone https://github.com/cumulo-autumn/StreamDiffusion.git
 python -m streamdiffusion.tools.install-tensorrt
 ```
+## Recommended Custom Nodes
+
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
 
 ## Node
 
