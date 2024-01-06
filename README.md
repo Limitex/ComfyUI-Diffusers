@@ -6,7 +6,7 @@ This repository is a custom node in ComfyUI.
 
 ### Workflow 1
 
-This is a program that allows you to use Huggingface Diffusers module with ComfyUI. Additionally, Stream Diffusion is also available.
+This is a program that allows you to use Hugging Face Diffusers module with ComfyUI. Additionally, Stream Diffusion is also available.
 
 ![Workflow](img/workflow.png)
 
