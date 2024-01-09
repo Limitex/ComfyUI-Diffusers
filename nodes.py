@@ -1,6 +1,8 @@
 import copy
 import os
+import gc
 import torch
+import traceback
 from safetensors.torch import load_file
 from .utils import SCHEDULERS, token_auto_concat_embeds, vae_pt_to_vae_diffuser, convert_images_to_tensors, convert_tensors_to_images, resize_images
 from comfy.model_management import get_torch_device
@@ -8,7 +10,7 @@ import folder_paths
 from streamdiffusion import StreamDiffusion
 from streamdiffusion.image_utils import postprocess_image
 from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
-
+from pathlib import Path
 
 class DiffusersPipelineLoader:
     def __init__(self):
@@ -118,13 +120,14 @@ class DiffusersModelMakeup:
     CATEGORY = "Diffusers"
 
     def makeup_pipeline(self, pipeline, scheduler, autoencoder):
-        pipeline = pipeline[0]
-        pipeline.vae = autoencoder
-        pipeline.scheduler = scheduler
-        pipeline.safety_checker = None if pipeline.safety_checker is None else lambda images, **kwargs: (images, [False])
-        pipeline.enable_attention_slicing()
-        pipeline = pipeline.to(self.torch_device)
-        return (pipeline,)
+        pipe = pipeline[0]
+        ckpt_cache_path = pipeline[1]
+        pipe.vae = autoencoder
+        pipe.scheduler = scheduler
+        pipe.safety_checker = None if pipe.safety_checker is None else lambda images, **kwargs: (images, [False])
+        pipe.enable_attention_slicing()
+        pipe = pipe.to(self.torch_device)
+        return ((pipe, ckpt_cache_path),)
 
 class DiffusersClipTextEncode:
     @classmethod
@@ -143,7 +146,7 @@ class DiffusersClipTextEncode:
     CATEGORY = "Diffusers"
 
     def concat_embeds(self, maked_pipeline, positive, negative):
-        positive_embeds, negative_embeds = token_auto_concat_embeds(maked_pipeline, positive,negative)
+        positive_embeds, negative_embeds = token_auto_concat_embeds(maked_pipeline[0], positive,negative)
 
         return (positive_embeds, negative_embeds, positive, negative, )
 
@@ -171,7 +174,7 @@ class DiffusersSampler:
     CATEGORY = "Diffusers"
 
     def sample(self, maked_pipeline, positive_embeds, negative_embeds, height, width, steps, cfg, seed):
-        images = maked_pipeline(
+        images = maked_pipeline[0](
             prompt_embeds=positive_embeds,
             height=height,
             width=width,
@@ -236,9 +239,11 @@ class StreamDiffusionCreateStream:
                 "use_denoising_batch": ("BOOLEAN", {"default": True}),
                 "frame_buffer_size": ("INT", {"default": 1, "min": 1, "max": 10000}),
                 "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
-                "xformers_memory_efficient_attention": ("BOOLEAN", {"default": False}),
+                "acceleration": (["none", "xformers", "tensorrt"], {"default": "tensorrt"}),
                 "lcm_lora" : ("LCM_LORA", ),
-                "tiny_vae" : ("STRING", {"default": "madebyollin/taesd"})
+                "tiny_vae" : ("STRING", {"default": "madebyollin/taesd"}),
+                "use_lcm_lora" : ("BOOLEAN", {"default": True}),
+                "use_tiny_vae" : ("BOOLEAN", {"default": True}),
             }, 
         }
 
@@ -247,8 +252,9 @@ class StreamDiffusionCreateStream:
 
     CATEGORY = "Diffusers/StreamDiffusion"
 
-    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, xformers_memory_efficient_attention, lcm_lora, tiny_vae):
-        maked_pipeline = copy.deepcopy(maked_pipeline)
+    def load_stream(self, maked_pipeline, t_index_list, width, height, do_add_noise, use_denoising_batch, frame_buffer_size, cfg_type, acceleration, lcm_lora, tiny_vae, use_lcm_lora, use_tiny_vae):
+        model_id_or_path = maked_pipeline[1]
+        maked_pipeline: StableDiffusionPipeline = copy.deepcopy(maked_pipeline[0])
         lcm_lora = copy.deepcopy(lcm_lora)
         stream = StreamDiffusion(
             pipe = maked_pipeline,
@@ -272,8 +278,179 @@ class StreamDiffusionCreateStream:
             dtype=maked_pipeline.dtype
         )
         
-        if xformers_memory_efficient_attention:
-            maked_pipeline.enable_xformers_memory_efficient_attention()
+        batch_size = (
+            len(t_index_list) * frame_buffer_size
+            if use_denoising_batch
+            else frame_buffer_size
+        )
+
+        try:
+            if acceleration == "xformers":
+                stream.pipe.enable_xformers_memory_efficient_attention()
+            if acceleration == "tensorrt":
+                from polygraphy import cuda
+                from streamdiffusion.acceleration.tensorrt import (
+                    TorchVAEEncoder,
+                    compile_unet,
+                    compile_vae_decoder,
+                    compile_vae_encoder,
+                )
+                from streamdiffusion.acceleration.tensorrt.engine import (
+                    AutoencoderKLEngine,
+                    UNet2DConditionModelEngine,
+                )
+                from streamdiffusion.acceleration.tensorrt.models import (
+                    VAE,
+                    UNet,
+                    VAEEncoder,
+                )
+
+                def create_prefix(
+                    model_id_or_path: str,
+                    max_batch_size: int,
+                    min_batch_size: int,
+                ):
+                    maybe_path = Path(model_id_or_path)
+                    if maybe_path.exists():
+                        return f"{maybe_path.stem}--lcm_lora-{use_lcm_lora}--tiny_vae-{use_tiny_vae}--max_batch-{max_batch_size}--min_batch-{min_batch_size}--mode-{self.mode}"
+                    else:
+                        return f"{model_id_or_path}--lcm_lora-{use_lcm_lora}--tiny_vae-{use_tiny_vae}--max_batch-{max_batch_size}--min_batch-{min_batch_size}--mode-{self.mode}"
+
+                engine_dir = Path(engine_dir)
+                unet_path = os.path.join(
+                    engine_dir,
+                    create_prefix(
+                        model_id_or_path=model_id_or_path,
+                        max_batch_size=stream.trt_unet_batch_size,
+                        min_batch_size=stream.trt_unet_batch_size,
+                    ),
+                    "unet.engine",
+                )
+                vae_encoder_path = os.path.join(
+                    engine_dir,
+                    create_prefix(
+                        model_id_or_path=model_id_or_path,
+                        max_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                        min_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    ),
+                    "vae_encoder.engine",
+                )
+                vae_decoder_path = os.path.join(
+                    engine_dir,
+                    create_prefix(
+                        model_id_or_path=model_id_or_path,
+                        max_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                        min_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    ),
+                    "vae_decoder.engine",
+                )
+
+                if not os.path.exists(unet_path):
+                    os.makedirs(os.path.dirname(unet_path), exist_ok=True)
+                    unet_model = UNet(
+                        fp16=True,
+                        device=stream.device,
+                        max_batch_size=stream.trt_unet_batch_size,
+                        min_batch_size=stream.trt_unet_batch_size,
+                        embedding_dim=stream.text_encoder.config.hidden_size,
+                        unet_dim=stream.unet.config.in_channels,
+                    )
+                    compile_unet(
+                        stream.unet,
+                        unet_model,
+                        unet_path + ".onnx",
+                        unet_path + ".opt.onnx",
+                        unet_path,
+                        opt_batch_size=stream.trt_unet_batch_size,
+                    )
+
+                if not os.path.exists(vae_decoder_path):
+                    os.makedirs(os.path.dirname(vae_decoder_path), exist_ok=True)
+                    stream.vae.forward = stream.vae.decode
+                    vae_decoder_model = VAE(
+                        device=stream.device,
+                        max_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                        min_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    )
+                    compile_vae_decoder(
+                        stream.vae,
+                        vae_decoder_model,
+                        vae_decoder_path + ".onnx",
+                        vae_decoder_path + ".opt.onnx",
+                        vae_decoder_path,
+                        opt_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    )
+                    delattr(stream.vae, "forward")
+
+                if not os.path.exists(vae_encoder_path):
+                    os.makedirs(os.path.dirname(vae_encoder_path), exist_ok=True)
+                    vae_encoder = TorchVAEEncoder(stream.vae).to(torch.device("cuda"))
+                    vae_encoder_model = VAEEncoder(
+                        device=stream.device,
+                        max_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                        min_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    )
+                    compile_vae_encoder(
+                        vae_encoder,
+                        vae_encoder_model,
+                        vae_encoder_path + ".onnx",
+                        vae_encoder_path + ".opt.onnx",
+                        vae_encoder_path,
+                        opt_batch_size=batch_size
+                        if self.mode == "txt2img"
+                        else stream.frame_bff_size,
+                    )
+
+                cuda_steram = cuda.Stream()
+
+                vae_config = stream.vae.config
+                vae_dtype = stream.vae.dtype
+
+                stream.unet = UNet2DConditionModelEngine(
+                    unet_path, cuda_steram, use_cuda_graph=False
+                )
+                stream.vae = AutoencoderKLEngine(
+                    vae_encoder_path,
+                    vae_decoder_path,
+                    cuda_steram,
+                    stream.pipe.vae_scale_factor,
+                    use_cuda_graph=False,
+                )
+                setattr(stream.vae, "config", vae_config)
+                setattr(stream.vae, "dtype", vae_dtype)
+
+                gc.collect()
+                torch.cuda.empty_cache()
+
+                print("TensorRT acceleration enabled.")
+            if acceleration == "sfast":
+                from streamdiffusion.acceleration.sfast import (
+                    accelerate_with_stable_fast,
+                )
+
+                stream = accelerate_with_stable_fast(stream)
+                print("StableFast acceleration enabled.")
+        except Exception:
+            traceback.print_exc()
+            print("Acceleration has failed. Falling back to normal mode.")
         return (stream, )
 
 class StreamDiffusionSampler:
