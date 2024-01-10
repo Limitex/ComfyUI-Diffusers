@@ -68,3 +68,7 @@ https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
 ### StreamDiffusion Warmup (StreamDiffusionWarmup)
 
 ### StreamDiffusion Fast Sampler (StreamDiffusionFastSampler)
+
+## Reference 
+
+https://github.com/cumulo-autumn/StreamDiffusion
