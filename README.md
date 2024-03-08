@@ -27,18 +27,17 @@ The execution looks like this:
 
 ![Workflow3demo](img/workflow3demo.gif)
 
-
 ## Usage
 
 Run the following command inside ComfyUI/custom_nodes.
 
 ```cmd
-git clone https://github.com/Limitex/ComfyUI-Diffusers.git
+git clone --recurse-submodules https://github.com/Limitex/ComfyUI-Diffusers.git
 cd ComfyUI-Diffusers
 pip install -r requirements.txt
-git clone https://github.com/cumulo-autumn/StreamDiffusion.git
 python -m streamdiffusion.tools.install-tensorrt
 ```
+
 ## Recommended Custom Nodes
 
 https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
@@ -69,6 +68,6 @@ https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
 
 ### StreamDiffusion Fast Sampler (StreamDiffusionFastSampler)
 
-## Reference 
+## Reference
 
 https://github.com/cumulo-autumn/StreamDiffusion
