@@ -404,7 +404,33 @@ class StreamDiffusionFastSampler:
 # - - - - - - - - - - - - - - - - - -
 
 
+class DiffusersLoraLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "maked_pipeline": ("MAKED_PIPELINE",),
+                "lora_name": (folder_paths.get_filename_list("loras"),),
+                "weight": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
+            }
+        }
+
+    RETURN_TYPES = ("MAKED_PIPELINE",)
+    FUNCTION = "load_lora"
+    CATEGORY = "Diffusers"
+
+    def load_lora(self, maked_pipeline, lora_name, weight):
+        pipeline = copy.deepcopy(maked_pipeline)
+        lora_path = folder_paths.get_full_path("loras", lora_name)
+        
+        # Load the LoRA weights directly
+        pipeline.load_lora_weights(lora_path)
+        pipeline.fuse_lora(lora_scale = weight)
+            
+        return (pipeline,)
+
 NODE_CLASS_MAPPINGS = {
+    "DiffusersLoraLoader": DiffusersLoraLoader,
     "DiffusersPipelineLoader": DiffusersPipelineLoader,
     "DiffusersVaeLoader": DiffusersVaeLoader,
     "DiffusersSchedulerLoader": DiffusersSchedulerLoader,
@@ -420,6 +446,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "DiffusersLoraLoader": "Diffusers LoRA Loader",
     "DiffusersPipelineLoader": "Diffusers Pipeline Loader",
     "DiffusersVaeLoader": "Diffusers Vae Loader",
     "DiffusersSchedulerLoader": "Diffusers Scheduler Loader",
