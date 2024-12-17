@@ -1,0 +1,17 @@
+diff --git a/src/streamdiffusion/pipeline.py b/src/streamdiffusion/pipeline.py
+index 66c08c8..33df7ea 100644
+--- a/src/streamdiffusion/pipeline.py
++++ b/src/streamdiffusion/pipeline.py
+@@ -440,9 +440,9 @@ class StreamDiffusion:
+     def __call__(
+         self, x: Union[torch.Tensor, PIL.Image.Image, np.ndarray] = None
+     ) -> torch.Tensor:
+-        start = torch.cuda.Event(enable_timing=True)
+-        end = torch.cuda.Event(enable_timing=True)
+-        start.record()
++        # start = torch.cuda.Event(enable_timing=True)
++        # end = torch.cuda.Event(enable_timing=True)
++        # start.record()
+         if x is not None:
+             x = self.image_processor.preprocess(x, self.height, self.width).to(
+                 device=self.device, dtype=self.dtype

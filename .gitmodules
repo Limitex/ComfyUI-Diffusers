@@ -1,0 +1,3 @@
+[submodule "StreamDiffusion"]
+	path = StreamDiffusion
+	url = https://github.com/cumulo-autumn/StreamDiffusion.git
