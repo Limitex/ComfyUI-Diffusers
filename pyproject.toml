@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-diffusers"
-description = "This extension enables the use of the diffuser pipeline in ComfyUI."
+description = "This extension enables the use of the diffuser pipeline in ComfyUI. It also includes nodes related to Stream Diffusion."
 version = "1.0.0"
 license = "LICENSE"
 dependencies = ["diffusers[torch]", "accelerate", "transformers", "safetensors", "omegaconf", "pytorch_lightning", "xformers", "git+https://github.com/cumulo-autumn/StreamDiffusion.git@main#egg=streamdiffusion[tensorrt]"]
