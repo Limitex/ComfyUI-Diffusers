@@ -1,4 +1,4 @@
-diffusers[torch]
+diffusers[torch]>=0.29.0
 accelerate
 transformers 
 safetensors 
