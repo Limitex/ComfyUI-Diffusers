@@ -1,0 +1,140 @@
+version: '3'
+
+vars:
+  PYTHON_DIRS: "src tests"
+
+tasks:
+  default:
+    desc: "List all available tasks"
+    cmds:
+      - task --list
+
+  install:
+    desc: "Install all dependencies (including dev) based on poetry.lock"
+    cmds:
+      - poetry install
+
+  install:prod:
+    desc: "Install only production dependencies"
+    cmds:
+      - poetry install --without dev
+
+  update:
+    desc: "Update dependencies based on pyproject.toml and regenerate poetry.lock"
+    cmds:
+      - poetry update
+
+  add:
+    desc: "Add a new production dependency (usage: task add PACKAGE=requests)"
+    cmds:
+      - poetry add {{.PACKAGE}}
+    preconditions:
+      - sh: "[ -n '{{.PACKAGE}}' ]"
+        msg: "PACKAGE variable must be set (e.g., task add PACKAGE=requests)"
+
+  add:dev:
+    desc: "Add a new development dependency (usage: task add:dev PACKAGE=pytest)"
+    cmds:
+      - poetry add {{.PACKAGE}} --group dev
+    preconditions:
+      - sh: "[ -n '{{.PACKAGE}}' ]"
+        msg: "PACKAGE variable must be set (e.g., task add:dev PACKAGE=pytest)"
+
+  remove:
+    desc: "Remove a dependency (usage: task remove PACKAGE=requests)"
+    cmds:
+      - poetry remove {{.PACKAGE}}
+    preconditions:
+      - sh: "[ -n '{{.PACKAGE}}' ]"
+        msg: "PACKAGE variable must be set (e.g., task remove PACKAGE=requests)"
+
+  shell:
+    desc: "Activate the virtual environment shell managed by Poetry"
+    cmds:
+      - poetry shell
+
+  run:
+    desc: "Run a command within the virtual environment (usage: task run -- python main.py)"
+    cmds:
+      - poetry run {{.CLI_ARGS}}
+
+  format:
+    desc: "Automatically format code using Ruff"
+    cmds:
+      - poetry run ruff format {{.PYTHON_DIRS}}
+      - poetry run ruff check {{.PYTHON_DIRS}} --fix
+
+  format:check:
+    desc: "Check code formatting without making changes"
+    cmds:
+      - echo "Checking ruff format..."
+      - poetry run ruff format {{.PYTHON_DIRS}} --check
+
+  lint:
+    desc: "Run linting with ruff"
+    cmds:
+      - poetry run ruff check {{.PYTHON_DIRS}}
+
+  lint:fix:
+    desc: "Run linting with auto-fix"
+    cmds:
+      - poetry run ruff check {{.PYTHON_DIRS}} --fix
+
+  type:
+    desc: "Run static type checking using mypy"
+    dir: src
+    cmds:
+      - poetry run mypy .
+
+  test:
+    desc: "Run tests using pytest"
+    cmds:
+      - poetry run pytest
+
+  test:verbose:
+    desc: "Run tests with verbose output"
+    cmds:
+      - poetry run pytest -v
+
+  test:cov:
+    desc: "Run tests with coverage report"
+    cmds:
+      - poetry run pytest --cov={{.PYTHON_DIRS}} --cov-report=html --cov-report=term
+
+  check:
+    desc: "Run all checks (format check, lint, type check, and tests)"
+    cmds:
+      - echo "=== Checking format ==="
+      - task: format:check
+      - echo "=== Linting ==="
+      - task: lint
+      - echo "=== Type checking ==="
+      - task: type
+      - echo "=== Running tests ==="
+      - task: test
+      - echo "=== All checks passed! ==="
+
+  fix:
+    desc: "Auto-fix all formatting and linting issues"
+    cmds:
+      - task: format
+      - task: lint:fix
+
+  build:
+    desc: "Build sdist (source distribution) and wheel (built distribution)"
+    cmds:
+      - poetry build
+
+  clean:
+    desc: "Clean up cache and temporary files"
+    cmds:
+      - rm -rf .pytest_cache
+      - rm -rf .mypy_cache
+      - rm -rf .ruff_cache
+      - rm -rf htmlcov
+      - rm -rf .coverage
+      - rm -rf dist
+      - rm -rf build
+      - find . -type d -name __pycache__ -exec rm -rf {} +
+      - find . -type d -name "*.egg-info" -exec rm -rf {} +
+      - find . -type f -name "*.pyc" -delete
