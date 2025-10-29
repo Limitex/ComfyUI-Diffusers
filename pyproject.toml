@@ -8,7 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "dependency-injector (>=4.48.2,<5.0.0)"
+    "dependency-injector (>=4.48.2,<5.0.0)",
+    "diffusers[torch] (>=0.35.2,<0.36.0)"
 ]
 
 [tool.poetry]
