@@ -18,7 +18,9 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "comfyui_diffusers", from = "src"}]
+packages = [
+    {include = "src"}
+]
 
 [tool.ruff]
 line-length = 100
@@ -45,7 +47,7 @@ ignore = [
 "__init__.py" = ["F401"]  # unused imports in __init__.py
 
 [tool.ruff.lint.isort]
-known-first-party = ["comfyui_diffusers"]
+known-first-party = ["src"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -53,7 +55,8 @@ indent-style = "space"
 
 [tool.mypy]
 python_version = "3.10"
-namespace_packages = false
+namespace_packages = true
+explicit_package_bases = true
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -66,6 +69,34 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "folder_paths",
+    "folder_paths.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "diffusers",
+    "diffusers.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "dependency_injector",
+    "dependency_injector.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "transformers",
+    "transformers.*",
+]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
