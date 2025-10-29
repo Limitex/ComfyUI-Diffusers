@@ -13,21 +13,25 @@ tasks:
     desc: "Install all dependencies (including dev) based on poetry.lock"
     cmds:
       - poetry install
+      - task: export
 
   install:prod:
     desc: "Install only production dependencies"
     cmds:
       - poetry install --without dev
+      - task: export
 
   update:
     desc: "Update dependencies based on pyproject.toml and regenerate poetry.lock"
     cmds:
       - poetry update
+      - task: export
 
   add:
     desc: "Add a new production dependency (usage: task add PACKAGE=requests)"
     cmds:
       - poetry add {{.PACKAGE}}
+      - task: export
     preconditions:
       - sh: "[ -n '{{.PACKAGE}}' ]"
         msg: "PACKAGE variable must be set (e.g., task add PACKAGE=requests)"
@@ -36,6 +40,7 @@ tasks:
     desc: "Add a new development dependency (usage: task add:dev PACKAGE=pytest)"
     cmds:
       - poetry add {{.PACKAGE}} --group dev
+      - task: export
     preconditions:
       - sh: "[ -n '{{.PACKAGE}}' ]"
         msg: "PACKAGE variable must be set (e.g., task add:dev PACKAGE=pytest)"
@@ -44,6 +49,7 @@ tasks:
     desc: "Remove a dependency (usage: task remove PACKAGE=requests)"
     cmds:
       - poetry remove {{.PACKAGE}}
+      - task: export
     preconditions:
       - sh: "[ -n '{{.PACKAGE}}' ]"
         msg: "PACKAGE variable must be set (e.g., task remove PACKAGE=requests)"
@@ -124,6 +130,16 @@ tasks:
     desc: "Build sdist (source distribution) and wheel (built distribution)"
     cmds:
       - poetry build
+
+  export:
+    desc: "Export production dependencies to requirements.txt"
+    cmds:
+      - poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+  export:dev:
+    desc: "Export all dependencies (including dev) to requirements-dev.txt"
+    cmds:
+      - poetry export -f requirements.txt --output requirements-dev.txt --without-hashes --with dev
 
   clean:
     desc: "Clean up cache and temporary files"
