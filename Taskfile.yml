@@ -67,24 +67,25 @@ tasks:
   format:
     desc: "Automatically format code using Ruff"
     cmds:
-      - poetry run ruff format {{.PYTHON_DIRS}}
-      - poetry run ruff check {{.PYTHON_DIRS}} --fix
+      - poetry run ruff format {{.PYTHON_DIRS}} __init__.py
+      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py --fix
 
   format:check:
     desc: "Check code formatting without making changes"
     cmds:
       - echo "Checking ruff format..."
-      - poetry run ruff format {{.PYTHON_DIRS}} --check
+      - poetry run ruff format {{.PYTHON_DIRS}} __init__.py --check
+      - poetry run ruff format __init__.py --check
 
   lint:
     desc: "Run linting with ruff"
     cmds:
-      - poetry run ruff check {{.PYTHON_DIRS}}
+      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py
 
   lint:fix:
     desc: "Run linting with auto-fix"
     cmds:
-      - poetry run ruff check {{.PYTHON_DIRS}} --fix
+      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py --fix
 
   type:
     desc: "Run static type checking using mypy"
