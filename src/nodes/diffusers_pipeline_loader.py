@@ -2,8 +2,8 @@ import folder_paths  # pyright: ignore[reportMissingImports]
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
-from ..domain.model import PipelineModel
-from ..ui.pipeline_handler import PipelineHandler
+from ..ui import PipelineHandler
+from .dto import ComfyUIPipelineDTO
 
 
 class DiffusersPipelineLoader:
@@ -18,7 +18,7 @@ class DiffusersPipelineLoader:
             }
         }
 
-    RETURN_TYPES = ("PIPELINE",)
+    RETURN_TYPES = (ComfyUIPipelineDTO.COMFY_TYPE,)
     FUNCTION = "execute"
     CATEGORY = "Diffusers"
 
@@ -27,6 +27,7 @@ class DiffusersPipelineLoader:
         self,
         checkpoint_name: str,
         handler: PipelineHandler = Provide[Container.pipeline_handler_provider],
-    ) -> tuple[PipelineModel]:
+    ) -> tuple[ComfyUIPipelineDTO]:
         pipeline_model = handler.create(checkpoint_name)
-        return (pipeline_model,)
+        pipeline_dto = ComfyUIPipelineDTO.from_domain(pipeline_model)
+        return (pipeline_dto,)
