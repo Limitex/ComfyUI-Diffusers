@@ -7,16 +7,16 @@ from ..ui.pipeline_handler import PipelineHandler
 
 class Container(containers.DeclarativeContainer):
     # 1. Repositories
-    pipeline_repository_provider = providers.Factory(DiffusersPipelineRepository)
+    pipeline_repository = providers.Factory(DiffusersPipelineRepository)
 
     # 2. Services
-    create_pipeline_service_provider = providers.Factory(
+    create_pipeline_service = providers.Factory(
         CreatePipelineService,
-        pipeline_repo=pipeline_repository_provider,
+        pipeline_repo=pipeline_repository,
     )
 
     # 3. Handler
-    pipeline_handler_provider = providers.Factory(
+    pipeline_handler = providers.Factory(
         PipelineHandler,
-        create_pipeline_service=create_pipeline_service_provider,
+        create_pipeline_service=create_pipeline_service,
     )

@@ -6,7 +6,7 @@ from diffusers import StableDiffusionPipeline
 
 class IPipelineRepository(ABC):
     @abstractmethod
-    def convert_from_single_file(self, checkpoint_path: str, dtype: torch.dtype) -> str:
+    def convert_and_save_from_single_file(self, checkpoint_path: str, dtype: torch.dtype) -> str:
         pass
 
     @abstractmethod

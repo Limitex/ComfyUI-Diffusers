@@ -11,8 +11,10 @@ class CreatePipelineService:
         self.pipeline_repo = pipeline_repo
         self.dtype = torch.float32
 
-    def execute(self, checkpoint_full_path: str) -> PipelineModel:
-        path = self.pipeline_repo.convert_from_single_file(checkpoint_full_path, self.dtype)
+    def create_from_checkpoint(self, checkpoint_full_path: str) -> PipelineModel:
+        path = self.pipeline_repo.convert_and_save_from_single_file(
+            checkpoint_full_path, self.dtype
+        )
         if not os.path.exists(path):
             raise RuntimeError(f"Failed to convert pipeline checkpoint: {checkpoint_full_path}")
 

@@ -14,4 +14,4 @@ class PipelineHandler:
         checkpoint_path = folder_paths.get_full_path("checkpoints", checkpoint_name)
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_name}")
-        return self.create_pipeline_service.execute(checkpoint_path)
+        return self.create_pipeline_service.create_from_checkpoint(checkpoint_path)

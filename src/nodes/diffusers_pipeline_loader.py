@@ -26,7 +26,7 @@ class DiffusersPipelineLoader:
     def execute(
         self,
         checkpoint_name: str,
-        handler: PipelineHandler = Provide[Container.pipeline_handler_provider],
+        handler: PipelineHandler = Provide[Container.pipeline_handler],
     ) -> tuple[ComfyUIPipelineDTO]:
         pipeline_model = handler.create(checkpoint_name)
         pipeline_dto = ComfyUIPipelineDTO.from_domain(pipeline_model)

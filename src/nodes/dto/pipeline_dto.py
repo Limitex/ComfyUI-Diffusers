@@ -39,7 +39,7 @@ class ComfyUIPipelineDTO:
     """
 
     # ClassVar to avoid being treated as a dataclass field
-    COMFY_TYPE: ClassVar[str] = "PIPELINE"
+    COMFY_TYPE: ClassVar[str] = "DIFFUSERS_PIPELINE"
 
     pipeline: StableDiffusionPipeline
     path: str
