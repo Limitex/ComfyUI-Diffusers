@@ -1,3 +1,4 @@
+from .autoencoder_repository import DiffusersAutoencoderRepository
 from .pipeline_repository import DiffusersPipelineRepository
 
-__all__ = ["DiffusersPipelineRepository"]
+__all__ = ["DiffusersPipelineRepositoryDiffusersAutoencoderRepository"]

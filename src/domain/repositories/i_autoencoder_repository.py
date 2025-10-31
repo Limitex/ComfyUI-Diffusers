@@ -1,0 +1,14 @@
+from abc import ABC, abstractmethod
+
+import torch
+from diffusers import AutoencoderKL
+
+
+class IAutoencoderRepository(ABC):
+    @abstractmethod
+    def convert_and_save_from_single_file(self, checkpoint_path: str) -> str:
+        pass
+
+    @abstractmethod
+    def load_autoencoder_from_path(self, model_path: str, dtype: torch.dtype) -> AutoencoderKL:
+        pass
