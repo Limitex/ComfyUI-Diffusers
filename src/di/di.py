@@ -1,14 +1,15 @@
+"""Dependency injection container configuration."""
+
 from dependency_injector import containers, providers
 
-from ..infra.diffusers import DiffusersAutoencoderRepository
-from ..infra.diffusers import DiffusersPipelineRepository
-from ..service import CreateAutoencoderService
-from ..service import CreatePipelineService
-from ..ui import AutoencoderHandler
-from ..ui import PipelineHandler
+from ..infra.diffusers import DiffusersAutoencoderRepository, DiffusersPipelineRepository
+from ..service import CreateAutoencoderService, CreatePipelineService
+from ..ui import AutoencoderHandler, PipelineHandler
 
 
 class Container(containers.DeclarativeContainer):
+    """Dependency injection container for the application."""
+
     # 1. Repositories
     pipeline_repository = providers.Factory(DiffusersPipelineRepository)
     autoencoder_repository = providers.Factory(DiffusersAutoencoderRepository)

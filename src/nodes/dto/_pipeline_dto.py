@@ -8,8 +8,7 @@ from ...domain.model import PipelineModel
 
 @dataclass
 class ComfyUIPipelineDTO:
-    """
-    Data Transfer Object for Diffusers Pipeline in ComfyUI.
+    """Data Transfer Object for Diffusers Pipeline in ComfyUI.
 
     This DTO is designed to be used across different custom nodes.
     Other node developers can import and use this type for pipeline operations.
@@ -46,8 +45,7 @@ class ComfyUIPipelineDTO:
 
     @classmethod
     def from_domain(cls, model: PipelineModel) -> "ComfyUIPipelineDTO":
-        """
-        Create DTO from domain model.
+        """Create DTO from domain model.
 
         Args:
             model: PipelineModel from domain layer

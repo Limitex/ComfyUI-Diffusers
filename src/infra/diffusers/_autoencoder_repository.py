@@ -14,6 +14,7 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     renew_vae_resnet_paths,
 )
 from omegaconf import OmegaConf
+from safetensors import safe_open
 
 from ...domain.repositories import IAutoencoderRepository
 
@@ -197,7 +198,8 @@ class DiffusersAutoencoderRepository(IAutoencoderRepository):
     ) -> str:
         # Only support V1
         r = requests.get(
-            "https://raw.githubusercontent.com/CompVis/stable-diffusion/main/configs/stable-diffusion/v1-inference.yaml"
+            "https://raw.githubusercontent.com/CompVis/stable-diffusion/main/configs/stable-diffusion/v1-inference.yaml",
+            timeout=30,
         )
         io_obj = io.BytesIO(r.content)
 
@@ -205,11 +207,9 @@ class DiffusersAutoencoderRepository(IAutoencoderRepository):
         image_size = 512
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if checkpoint_path.endswith("safetensors"):
-            from safetensors import safe_open
-
             checkpoint: dict[str, Any] = {}
             with safe_open(checkpoint_path, framework="pt", device="cpu") as f:  # type: ignore[no-untyped-call]
-                for key in f.keys():
+                for key in f:
                     checkpoint[key] = f.get_tensor(key)
         else:
             checkpoint = torch.load(checkpoint_path, map_location=device)["state_dict"]

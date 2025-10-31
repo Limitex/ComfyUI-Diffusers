@@ -11,7 +11,7 @@ class DiffusersVaeLoader:
         pass
 
     @classmethod
-    def INPUT_TYPES(s) -> dict[str, dict[str, tuple[tuple[str, ...], ...]]]:
+    def INPUT_TYPES(cls) -> dict[str, dict[str, tuple[tuple[str, ...], ...]]]:
         return {
             "required": {
                 "vae_name": (folder_paths.get_filename_list("vae"),),

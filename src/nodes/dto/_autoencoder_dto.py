@@ -8,8 +8,7 @@ from ...domain.model import AutoencoderModel
 
 @dataclass
 class ComfyUIAutoencoderDTO:
-    """
-    Data Transfer Object for Diffusers Autoencoder in ComfyUI.
+    """Data Transfer Object for Diffusers Autoencoder in ComfyUI.
 
     This DTO is designed to be used across different custom nodes.
     Other node developers can import and use this type for autoencoder operations.
@@ -47,8 +46,7 @@ class ComfyUIAutoencoderDTO:
 
     @classmethod
     def from_domain(cls, model: AutoencoderModel) -> "ComfyUIAutoencoderDTO":
-        """
-        Create DTO from domain model.
+        """Create DTO from domain model.
 
         Args:
             model: AutoencoderModel from domain layer
