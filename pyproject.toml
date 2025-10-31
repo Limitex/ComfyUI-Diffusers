@@ -113,4 +113,5 @@ dev = [
     "pytest-mock (>=3.15.1,<4.0.0)",
     "pytest-xdist (>=3.8.0,<4.0.0)",
     "bandit[toml] (>=1.8.6,<2.0.0)",
+    "import-linter (>=2.5.2,<3.0.0)",
 ]
