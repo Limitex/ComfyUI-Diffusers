@@ -1,0 +1,56 @@
+# Ruff configuration
+line-length = 100
+target-version = "py310"
+src = ["src"]
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "D",   # pydocstyle
+    "N",   # pep8-naming
+    "S",   # flake8-bandit
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+    "PIE", # flake8-pie
+    "PL",  # pylint
+]
+
+ignore = [
+    "E501",    # line too long (handled by formatter)
+    "B008",    # do not perform function calls in argument defaults
+    "C901",    # too complex
+    "PLR0913", # too many arguments
+    "PLR0912", # too many branches
+    "D203",    # one-blank-line-before-class (conflicts with D211)
+    "D213",    # multi-line-summary-second-line (conflicts with D212)
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "D104", "N999"]  # Root __init__.py for ComfyUI-Diffusers
+"tests/__init__.py" = ["D104", "N999"]    # tests/__init__.py
+"src/**/__init__.py" = ["F401", "D104"]   # src package __init__.py files
+"tests/**/*.py" = ["S101", "D103", "PLR2004", "S106", "ARG001", "PLR0913"]
+"src/nodes/*.py" = ["N802", "D102"]  # Allow INPUT_TYPES uppercase & missing docstrings
+"src/nodes/dto/*.py" = ["N815"]  # Allow ClassVar uppercase (COMFY_TYPE)
+"src/infra/diffusers/_autoencoder_repository.py" = ["PLR0915"]  # Allow large conversion function
+"src/di/*.py" = ["D102"]  # DI container doesn't need method docstrings
+
+[lint.isort]
+known-first-party = ["src"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[format]
+quote-style = "double"
+indent-style = "space"
