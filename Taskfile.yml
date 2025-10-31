@@ -90,7 +90,7 @@ tasks:
   type:
     desc: "Run static type checking using mypy"
     cmds:
-      - poetry run mypy src
+      - poetry run mypy {{.PYTHON_DIRS}}
 
   test:
     desc: "Run tests using pytest"
