@@ -3,7 +3,7 @@ name = "ComfyUI-Diffusers"
 version = "0.1.0"
 description = "This repository is a custom node in ComfyUI. This is a program that allows you to use Huggingface Diffusers module with ComfyUI. Additionally, Stream Diffusion is also available."
 authors = [
-    {name = "Limitex",email = "76650151+Limitex@users.noreply.github.com"}
+    {name = "Limitex", email = "76650151+Limitex@users.noreply.github.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
@@ -15,6 +15,8 @@ dependencies = [
     "torchvision (>=0.24.0,<0.25.0)",
     "transformers (>=4.57.1,<5.0.0)",
     "omegaconf (>=2.3.0,<3.0.0)",
+    "safetensors (>=0.4.0,<0.5.0)",
+    "requests (>=2.32.0,<3.0.0)",
 ]
 
 [tool.poetry]
@@ -36,18 +38,43 @@ select = [
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
+    "D",   # pydocstyle
+    "N",   # pep8-naming
+    "S",   # flake8-bandit
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+    "PIE", # flake8-pie
+    "PL",  # pylint
 ]
 ignore = [
-    "E501",  # line too long (handled by formatter)
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
+    "E501",    # line too long (handled by formatter)
+    "B008",    # do not perform function calls in argument defaults
+    "C901",    # too complex
+    "PLR0913", # too many arguments
+    "PLR0912", # too many branches
+    "D203",    # one-blank-line-before-class (conflicts with D211)
+    "D213",    # multi-line-summary-second-line (conflicts with D212)
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]  # unused imports in __init__.py
+"__init__.py" = ["F401", "D104", "N999"]  # Root __init__.py for ComfyUI-Diffusers
+"tests/__init__.py" = ["D104", "N999"]    # tests/__init__.py
+"src/**/__init__.py" = ["F401", "D104"]   # src package __init__.py files
+"tests/**/*.py" = ["S101", "D103", "PLR2004", "S106", "ARG001", "PLR0913"]
+"src/nodes/*.py" = ["N802", "D102"]  # Allow INPUT_TYPES uppercase & missing docstrings
+"src/nodes/dto/*.py" = ["N815"]  # Allow ClassVar uppercase (COMFY_TYPE)
+"src/infra/diffusers/_autoencoder_repository.py" = ["PLR0915"]  # Allow large conversion function
+"src/di/*.py" = ["D102"]  # DI container doesn't need method docstrings
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.format]
 quote-style = "double"
@@ -97,6 +124,184 @@ module = [
     "transformers.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "torch",
+    "torch.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "torchvision",
+    "torchvision.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "torchaudio",
+    "torchaudio.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "omegaconf",
+    "omegaconf.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "safetensors",
+    "safetensors.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+    "-v",
+    "-ra",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+    "src/di/*",  # DI container doesn't need test coverage
+]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+    "@overload",
+    "class .*\\bProtocol\\):",
+    "pass",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv", ".tox", "build", "dist"]
+tests = [
+    "B201", "B301", "B302", "B303", "B304", "B305", "B306", "B307",
+    "B308", "B309", "B310", "B311", "B312", "B313", "B314", "B315",
+    "B316", "B317", "B318", "B319", "B320", "B321", "B323", "B324", "B325"
+]
+skips = ["B101", "B601"]  # Allow assert in tests & shell=True if needed
+
+[tool.bandit.assert_used]
+skips = ["*/test_*.py", "*/*_test.py"]
+
+[tool.importlinter]
+root_package = "src"
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture Layers"
+type = "layers"
+layers = [
+    "src.nodes",      # Presentation Layer (ComfyUI Nodes)
+    "src.ui",         # Presentation Layer (Handlers)
+    "src.service",    # Application Layer (Use Cases)
+    "src.domain",     # Domain Layer (Entities & Interfaces)
+]
+containers = ["src"]
+
+[[tool.importlinter.contracts]]
+name = "Domain Layer Independence"
+type = "forbidden"
+source_modules = ["src.domain"]
+forbidden_modules = [
+    "src.service",
+    "src.ui",
+    "src.nodes",
+    "src.infra",
+    "src.di",
+]
+
+[[tool.importlinter.contracts]]
+name = "Application Layer Independence"
+type = "forbidden"
+source_modules = ["src.service"]
+forbidden_modules = [
+    "src.ui",
+    "src.nodes",
+    "src.infra",
+    "src.di",
+]
+
+[[tool.importlinter.contracts]]
+name = "Infrastructure depends only on Domain"
+type = "forbidden"
+source_modules = ["src.infra"]
+forbidden_modules = [
+    "src.service",
+    "src.ui",
+    "src.nodes",
+    "src.di",
+]
+
+[[tool.importlinter.contracts]]
+name = "Presentation Layer can use Application & Domain"
+type = "forbidden"
+source_modules = ["src.ui", "src.nodes"]
+forbidden_modules = [
+    "src.infra",
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+version_files = [
+    "pyproject.toml:version"
+]
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
