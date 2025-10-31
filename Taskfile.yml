@@ -71,11 +71,10 @@ tasks:
       - poetry run ruff check {{.PYTHON_DIRS}} __init__.py --fix
 
   format:check:
-    desc: "Check code formatting without making changes"
-    cmds:
-      - echo "Checking ruff format..."
-      - poetry run ruff format {{.PYTHON_DIRS}} __init__.py --check
-      - poetry run ruff format __init__.py --check
+      desc: "Check code formatting without making changes"
+      cmds:
+        - echo "Checking ruff format..."
+        - poetry run ruff format {{.PYTHON_DIRS}} __init__.py --check
 
   lint:
     desc: "Run linting with ruff"
