@@ -38,6 +38,34 @@ class DiffusersAutoencoderRepository(IAutoencoderRepository):
             cache_dir=self.cache_dir,
         )
         return vae
+    
+    # --- TECHNICAL DEBT & RISK WARNING ---
+    #
+    # The following methods (`_custom_convert_ldm_vae_checkpoint` and `_vae_pt_to_vae_diffuser`)
+    # are a direct port of the logic from an internal Hugging Face diffusers utility script
+    # (scripts/convert_vae_pt_to_diffusers.py).
+    #
+    # Rationale:
+    # This complex, low-level logic is a necessary workaround because the `diffusers`
+    # library (as of this writing) does not provide a stable, high-level API
+    # to load a VAE from a single checkpoint file (unlike the equivalent
+    # `StableDiffusionPipeline.from_single_file`).
+    #
+    # Risk:
+    # This implementation is **EXTREMELY BRITTLE**. It is tightly coupled to the
+    # internal key names, architecture, and private utility functions
+    # (e.g., `renew_vae_resnet_paths`) of the `diffusers` library.
+    #
+    # Any future updates to `diffusers` that change the `AutoencoderKL`
+    # architecture or refactor these internal utilities will likely **BREAK**
+    # this conversion logic silently and catastrophically.
+    #
+    # TODO:
+    # This entire block of code should be aggressively monitored during
+    # `diffusers` library upgrades. It should be **IMMEDIATELY DEPRECATED**
+    # and replaced if `diffusers` ever releases a stable, official API
+    # for this purpose (e.g., `AutoencoderKL.from_single_file(...)`).
+    # --- END WARNING ---
 
     # Reference from : https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
     def _custom_convert_ldm_vae_checkpoint(
