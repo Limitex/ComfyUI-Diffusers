@@ -1,11 +1,11 @@
 from dependency_injector import containers, providers
 
-from ..infra.diffusers.autoencoder_repository import DiffusersAutoencoderRepository
-from ..infra.diffusers.pipeline_repository import DiffusersPipelineRepository
-from ..service.create_autoencoder_service import CreateAutoencoderService
-from ..service.create_pipeline_service import CreatePipelineService
-from ..ui.autoencoder_handler import AutoencoderHandler
-from ..ui.pipeline_handler import PipelineHandler
+from ..infra.diffusers import DiffusersAutoencoderRepository
+from ..infra.diffusers import DiffusersPipelineRepository
+from ..service import CreateAutoencoderService
+from ..service import CreatePipelineService
+from ..ui import AutoencoderHandler
+from ..ui import PipelineHandler
 
 
 class Container(containers.DeclarativeContainer):

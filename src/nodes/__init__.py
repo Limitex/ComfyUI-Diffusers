@@ -1,6 +1,6 @@
 from ..di import Container
-from .diffusers_pipeline_loader import DiffusersPipelineLoader
-from .diffusers_vae_loader import DiffusersVaeLoader
+from ._diffusers_pipeline_loader import DiffusersPipelineLoader
+from ._diffusers_vae_loader import DiffusersVaeLoader
 from .dto import ComfyUIAutoencoderDTO, ComfyUIPipelineDTO
 
 container = Container()

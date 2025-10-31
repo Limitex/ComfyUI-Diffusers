@@ -3,7 +3,7 @@ import os
 import folder_paths  # pyright: ignore[reportMissingImports]
 
 from ..domain.model import AutoencoderModel
-from ..service.create_autoencoder_service import CreateAutoencoderService
+from ..service import CreateAutoencoderService
 
 
 class AutoencoderHandler:

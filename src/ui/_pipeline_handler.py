@@ -3,7 +3,7 @@ import os
 import folder_paths  # pyright: ignore[reportMissingImports]
 
 from ..domain.model import PipelineModel
-from ..service.create_pipeline_service import CreatePipelineService
+from ..service import CreatePipelineService
 
 
 class PipelineHandler:
