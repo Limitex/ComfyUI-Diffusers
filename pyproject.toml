@@ -115,4 +115,5 @@ dev = [
     "bandit[toml] (>=1.8.6,<2.0.0)",
     "import-linter (>=2.5.2,<3.0.0)",
     "pre-commit (>=4.3.0,<5.0.0)",
+    "commitizen (>=4.9.1,<5.0.0)",
 ]
