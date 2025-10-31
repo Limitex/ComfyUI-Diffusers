@@ -1,7 +1,7 @@
-from ._autoencoder import AutoencoderModel
-from ._pipeline import PipelineModel
+from ._autoencoder import Autoencoder
+from ._pipeline import Pipeline
 
 __all__ = [
-    "PipelineModel",
-    "AutoencoderModel",
+    "Pipeline",
+    "Autoencoder",
 ]

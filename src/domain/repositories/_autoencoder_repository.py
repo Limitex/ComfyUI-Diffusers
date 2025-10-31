@@ -4,7 +4,7 @@ import torch
 from diffusers import AutoencoderKL
 
 
-class IAutoencoderRepository(ABC):
+class AutoencoderRepository(ABC):
     @abstractmethod
     def convert_and_save_from_single_file(self, checkpoint_path: str) -> str:
         pass

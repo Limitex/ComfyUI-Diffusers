@@ -2,16 +2,16 @@ import os
 
 import torch
 
-from ..domain.model import PipelineModel
-from ..domain.repositories import IPipelineRepository
+from ..domain.model import Pipeline
+from ..domain.repositories import PipelineRepository
 
 
-class CreatePipelineService:
-    def __init__(self, pipeline_repo: IPipelineRepository) -> None:
+class PipelineService:
+    def __init__(self, pipeline_repo: PipelineRepository) -> None:
         self.pipeline_repo = pipeline_repo
         self.dtype = torch.float32
 
-    def create_from_checkpoint(self, checkpoint_full_path: str) -> PipelineModel:
+    def create_from_checkpoint(self, checkpoint_full_path: str) -> Pipeline:
         path = self.pipeline_repo.convert_and_save_from_single_file(
             checkpoint_full_path, self.dtype
         )
@@ -22,4 +22,4 @@ class CreatePipelineService:
         if pipe is None:
             raise RuntimeError(f"Failed to create pipeline from checkpoint: {checkpoint_full_path}")
 
-        return PipelineModel(pipeline=pipe, path=path)
+        return Pipeline(pipeline=pipe, path=path)

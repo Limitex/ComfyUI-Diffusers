@@ -4,10 +4,10 @@ import folder_paths  # pyright: ignore[reportMissingImports]
 import torch
 from diffusers import StableDiffusionPipeline
 
-from ...domain.repositories import IPipelineRepository
+from ...domain.repositories import PipelineRepository
 
 
-class DiffusersPipelineRepository(IPipelineRepository):
+class DiffusersPipelineRepository(PipelineRepository):
     def __init__(self) -> None:
         self.cache_dir = folder_paths.get_temp_directory()
 

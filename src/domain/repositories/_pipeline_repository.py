@@ -4,7 +4,7 @@ import torch
 from diffusers import StableDiffusionPipeline
 
 
-class IPipelineRepository(ABC):
+class PipelineRepository(ABC):
     @abstractmethod
     def convert_and_save_from_single_file(self, checkpoint_path: str, dtype: torch.dtype) -> str:
         pass

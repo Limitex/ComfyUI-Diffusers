@@ -16,10 +16,10 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
 from omegaconf import OmegaConf
 from safetensors import safe_open
 
-from ...domain.repositories import IAutoencoderRepository
+from ...domain.repositories import AutoencoderRepository
 
 
-class DiffusersAutoencoderRepository(IAutoencoderRepository):
+class DiffusersAutoencoderRepository(AutoencoderRepository):
     def __init__(self) -> None:
         self.cache_dir = folder_paths.get_temp_directory()
 
@@ -38,7 +38,7 @@ class DiffusersAutoencoderRepository(IAutoencoderRepository):
             cache_dir=self.cache_dir,
         )
         return vae
-    
+
     # --- TECHNICAL DEBT & RISK WARNING ---
     #
     # The following methods (`_custom_convert_ldm_vae_checkpoint` and `_vae_pt_to_vae_diffuser`)

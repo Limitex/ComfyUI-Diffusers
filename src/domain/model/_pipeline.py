@@ -4,6 +4,6 @@ from diffusers import StableDiffusionPipeline
 
 
 @dataclass
-class PipelineModel:
+class Pipeline:
     pipeline: StableDiffusionPipeline
     path: str

@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from diffusers import AutoencoderKL
 
-from ...domain.model import AutoencoderModel
+from ...domain.model import Autoencoder
 
 
 @dataclass
@@ -45,13 +45,13 @@ class ComfyUIAutoencoderDTO:
     path: str
 
     @classmethod
-    def from_domain(cls, model: AutoencoderModel) -> "ComfyUIAutoencoderDTO":
+    def from_domain(cls, autoencoder: Autoencoder) -> "ComfyUIAutoencoderDTO":
         """Create DTO from domain model.
 
         Args:
-            model: AutoencoderModel from domain layer
+            autoencoder: Autoencoder from domain layer
 
         Returns:
             ComfyUIAutoencoderDTO instance
         """
-        return cls(autoencoder=model.autoencoder, path=model.path)
+        return cls(autoencoder=autoencoder.autoencoder, path=autoencoder.path)

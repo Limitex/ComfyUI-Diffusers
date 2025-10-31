@@ -4,6 +4,6 @@ from diffusers import AutoencoderKL
 
 
 @dataclass
-class AutoencoderModel:
+class Autoencoder:
     autoencoder: AutoencoderKL
     path: str

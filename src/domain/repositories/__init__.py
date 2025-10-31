@@ -1,4 +1,4 @@
-from ._i_autoencoder_repository import IAutoencoderRepository
-from ._i_pipeline_repository import IPipelineRepository
+from ._autoencoder_repository import AutoencoderRepository
+from ._pipeline_repository import PipelineRepository
 
-__all__ = ["IPipelineRepository", "IAutoencoderRepository"]
+__all__ = ["PipelineRepository", "AutoencoderRepository"]

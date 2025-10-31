@@ -1,4 +1,4 @@
-from ._create_autoencoder_service import CreateAutoencoderService
-from ._create_pipeline_service import CreatePipelineService
+from ._autoencoder_service import AutoencoderService
+from ._pipeline_service import PipelineService
 
-__all__ = ["CreatePipelineService", "CreateAutoencoderService"]
+__all__ = ["PipelineService", "AutoencoderService"]

@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from diffusers import StableDiffusionPipeline
 
-from ...domain.model import PipelineModel
+from ...domain.model import Pipeline
 
 
 @dataclass
@@ -44,13 +44,13 @@ class ComfyUIPipelineDTO:
     path: str
 
     @classmethod
-    def from_domain(cls, model: PipelineModel) -> "ComfyUIPipelineDTO":
+    def from_domain(cls, pipeline: Pipeline) -> "ComfyUIPipelineDTO":
         """Create DTO from domain model.
 
         Args:
-            model: PipelineModel from domain layer
+            pipeline: Pipeline from domain layer
 
         Returns:
             ComfyUIPipelineDTO instance
         """
-        return cls(pipeline=model.pipeline, path=model.path)
+        return cls(pipeline=pipeline.pipeline, path=pipeline.path)
