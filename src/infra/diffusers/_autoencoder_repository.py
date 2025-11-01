@@ -236,7 +236,7 @@ class DiffusersAutoencoderRepository(AutoencoderRepository):
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if checkpoint_path.endswith("safetensors"):
             checkpoint: dict[str, Any] = {}
-            with safe_open(checkpoint_path, framework="pt", device="cpu") as f:  # type: ignore[no-untyped-call]
+            with safe_open(checkpoint_path, framework="pt", device="cpu") as f:  # type: ignore[no-untyped-call, attr-defined]
                 for key in f:
                     checkpoint[key] = f.get_tensor(key)
         else:
