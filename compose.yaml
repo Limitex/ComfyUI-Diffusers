@@ -7,12 +7,16 @@ services:
       - CUDA_VISIBLE_DEVICES=0
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - POETRY_VENV_IN_PROJECT=false
+      - POETRY_NO_INTERACTION=1
+      - POETRY_CACHE_DIR=/tmp/poetry_cache
     volumes:
       - ./docker/models/checkpoints:/app/ComfyUI/models/checkpoints
       - ./docker/models/loras:/app/ComfyUI/models/loras
       - ./docker/models/vae:/app/ComfyUI/models/vae
       - ./docker/output:/app/ComfyUI/output
       - ./docker/workflows:/app/ComfyUI/user/default/workflows
+      - .:/app/ComfyUI/custom_nodes/ComfyUI-Diffusers
     ports:
       - "8188:8188"
     restart: unless-stopped

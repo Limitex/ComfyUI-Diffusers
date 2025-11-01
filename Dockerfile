@@ -9,7 +9,15 @@ WORKDIR /app/ComfyUI
 FROM pytorch/pytorch:2.9.0-cuda13.0-cudnn9-runtime
 WORKDIR /app
 COPY --from=builder /app/ComfyUI /app/ComfyUI
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app/ComfyUI
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash
+RUN curl -sSL https://install.python-poetry.org | python -
 RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8188
 CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]
