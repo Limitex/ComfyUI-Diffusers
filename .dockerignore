@@ -219,3 +219,42 @@ __marimo__/
 *.safetensors
 *.vae
 *.pt
+
+# Git (critical for Docker - not in .gitignore)
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+LICENSE
+CHANGELOG.md
+docs/
+
+# Tests (commit to git, but exclude from image)
+tests/
+*_test.py
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# CI/CD
+.github/
+
+# Docker
+docker/
+Dockerfile
+Dockerfile.*
+compose.yaml
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development tools config
+.pre-commit-config.yaml
+.commitizenrc
+pyproject.toml
+poetry.lock
