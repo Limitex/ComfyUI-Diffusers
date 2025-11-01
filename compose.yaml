@@ -16,6 +16,7 @@ services:
       - ./docker/models/vae:/app/ComfyUI/models/vae
       - ./docker/output:/app/ComfyUI/output
       - ./docker/workflows:/app/ComfyUI/user/default/workflows
+      - ./docker/tmp:/app/ComfyUI/temp
       - .:/app/ComfyUI/custom_nodes/ComfyUI-Diffusers
     ports:
       - "8188:8188"
