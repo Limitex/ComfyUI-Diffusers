@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Hugging Face artifacts
+*.safetensors
+*.vae
+*.pt

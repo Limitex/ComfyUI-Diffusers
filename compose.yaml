@@ -1,0 +1,20 @@
+services:
+  comfyui:
+    build: .
+    container_name: comfyui
+    runtime: nvidia
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ./docker/models/checkpoints:/app/ComfyUI/models/checkpoints
+      - ./docker/models/loras:/app/ComfyUI/models/loras
+      - ./docker/models/vae:/app/ComfyUI/models/vae
+      - ./docker/output:/app/ComfyUI/output
+      - ./docker/workflows:/app/ComfyUI/user/default/workflows
+    ports:
+      - "8188:8188"
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
