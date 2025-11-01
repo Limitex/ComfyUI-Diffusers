@@ -73,7 +73,6 @@ tasks:
   format:check:
       desc: "Check code formatting without making changes"
       cmds:
-        - echo "Checking ruff format..."
         - poetry run ruff format {{.PYTHON_DIRS}} __init__.py --check
 
   lint:
@@ -109,15 +108,10 @@ tasks:
   check:
     desc: "Run all checks (format check, lint, type check, and tests)"
     cmds:
-      - echo "=== Checking format ==="
       - task: format:check
-      - echo "=== Linting ==="
       - task: lint
-      - echo "=== Type checking ==="
       - task: type
-      - echo "=== Running tests ==="
       - task: test
-      - echo "=== All checks passed! ==="
 
   fix:
     desc: "Auto-fix all formatting and linting issues"
