@@ -215,6 +215,10 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Docker files
+docker/
+!docker/.gitkeep
+
 # Hugging Face artifacts
 *.safetensors
 *.vae
