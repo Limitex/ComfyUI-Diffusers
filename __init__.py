@@ -3,6 +3,7 @@ from .src.nodes import (
     NODE_DISPLAY_NAME_MAPPINGS,
     ComfyUIAutoencoderDTO,
     ComfyUIClipDTO,
+    ComfyUIConditioningDTO,
     ComfyUIPipelineDTO,
 )
 
@@ -12,4 +13,5 @@ __all__ = [
     "ComfyUIPipelineDTO",
     "ComfyUIAutoencoderDTO",
     "ComfyUIClipDTO",
+    "ComfyUIConditioningDTO",
 ]

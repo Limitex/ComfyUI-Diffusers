@@ -2,9 +2,14 @@
 
 from dependency_injector import containers, providers
 
-from ..infra.diffusers import DiffusersAutoencoderRepository, DiffusersPipelineRepository
+from ..infra.diffusers import (
+    DiffusersAutoencoderRepository,
+    DiffusersPipelineRepository,
+)
+from ..infra.diffusers._text_encoder_repository import DiffusersTextEncoderRepository
 from ..service import AutoencoderService, PipelineService
-from ..ui import AutoencoderHandler, PipelineHandler
+from ..service._clip_text_encode_service import ClipTextEncodeService
+from ..ui import AutoencoderHandler, ClipTextEncodeHandler, PipelineHandler
 
 
 class Container(containers.DeclarativeContainer):
@@ -13,6 +18,7 @@ class Container(containers.DeclarativeContainer):
     # 1. Repositories
     pipeline_repository = providers.Factory(DiffusersPipelineRepository)
     autoencoder_repository = providers.Factory(DiffusersAutoencoderRepository)
+    text_encoder_repository = providers.Factory(DiffusersTextEncoderRepository)
 
     # 2. Services
     pipeline_service = providers.Factory(
@@ -23,6 +29,10 @@ class Container(containers.DeclarativeContainer):
         AutoencoderService,
         autoencoder_repo=autoencoder_repository,
     )
+    clip_text_encode_service = providers.Factory(
+        ClipTextEncodeService,
+        text_encoder_repo=text_encoder_repository,
+    )
 
     # 3. Handler
     pipeline_handler = providers.Factory(
@@ -32,4 +42,8 @@ class Container(containers.DeclarativeContainer):
     autoencoder_handler = providers.Factory(
         AutoencoderHandler,
         autoencoder_service=autoencoder_service,
+    )
+    clip_text_encode_handler = providers.Factory(
+        ClipTextEncodeHandler,
+        clip_text_encode_service=clip_text_encode_service,
     )
