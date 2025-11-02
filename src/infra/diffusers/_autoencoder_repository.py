@@ -32,11 +32,15 @@ class DiffusersAutoencoderRepository(AutoencoderRepository):
         return ckpt_cache_path
 
     def load_autoencoder_from_path(self, model_path: str, dtype: torch.dtype) -> AutoencoderKL:
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model path not found: {model_path}")
         vae: AutoencoderKL = AutoencoderKL.from_pretrained(  # type: ignore[no-untyped-call]
             pretrained_model_name_or_path=model_path,
             torch_dtype=dtype,
             cache_dir=self.cache_dir,
         )
+        if vae is None:
+            raise RuntimeError(f"Failed to load AutoencoderKL from path: {model_path}")
         return vae
 
     # --- TECHNICAL DEBT & RISK WARNING ---

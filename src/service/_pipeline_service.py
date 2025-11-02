@@ -2,7 +2,7 @@ import os
 
 import torch
 
-from ..domain.model import Pipeline
+from ..domain.model import Clip, Pipeline
 from ..domain.repositories import PipelineRepository
 
 
@@ -11,7 +11,7 @@ class PipelineService:
         self.pipeline_repo = pipeline_repo
         self.dtype = torch.float32
 
-    def create_from_checkpoint(self, checkpoint_full_path: str) -> Pipeline:
+    def create_from_checkpoint(self, checkpoint_full_path: str) -> tuple[Pipeline, Clip]:
         path = self.pipeline_repo.convert_and_save_from_single_file(
             checkpoint_full_path, self.dtype
         )
@@ -22,4 +22,12 @@ class PipelineService:
         if pipe is None:
             raise RuntimeError(f"Failed to create pipeline from checkpoint: {checkpoint_full_path}")
 
-        return Pipeline(pipeline=pipe, path=path)
+        pipeline = Pipeline(pipeline=pipe, path=path)
+
+        clip = Clip(
+            tokenizer=pipe.tokenizer,  # type: ignore[attr-defined]
+            text_encoder=pipe.text_encoder,  # type: ignore[attr-defined]
+            path=checkpoint_full_path,
+        )
+
+        return pipeline, clip
