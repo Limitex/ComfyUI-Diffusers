@@ -3,7 +3,7 @@ from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
 from ..ui import PipelineHandler
-from .dto import ComfyUIPipelineDTO
+from .dto import ComfyUIClipDTO, ComfyUIPipelineDTO
 
 
 class DiffusersPipelineLoader:
@@ -18,7 +18,10 @@ class DiffusersPipelineLoader:
             }
         }
 
-    RETURN_TYPES = (ComfyUIPipelineDTO.COMFY_TYPE,)
+    RETURN_TYPES = (
+        ComfyUIPipelineDTO.COMFY_TYPE,
+        ComfyUIClipDTO.COMFY_TYPE,
+    )
     FUNCTION = "execute"
     CATEGORY = "Diffusers"
 
@@ -27,8 +30,12 @@ class DiffusersPipelineLoader:
         self,
         checkpoint_name: str,
         handler: PipelineHandler = Provide[Container.pipeline_handler],
-    ) -> tuple[ComfyUIPipelineDTO]:
+    ) -> tuple[ComfyUIPipelineDTO, ComfyUIClipDTO]:
         checkpoint_path = folder_paths.get_full_path("checkpoints", checkpoint_name)
-        pipeline_model = handler.create(checkpoint_path)
+        pipeline_model, clip_model = handler.create(checkpoint_path)
         pipeline_dto = ComfyUIPipelineDTO.from_domain(pipeline_model)
-        return (pipeline_dto,)
+        clip_dto = ComfyUIClipDTO.from_domain(clip_model)
+        return (
+            pipeline_dto,
+            clip_dto,
+        )
