@@ -28,6 +28,7 @@ class DiffusersVaeLoader:
         vae_name: str,
         handler: AutoencoderHandler = Provide[Container.autoencoder_handler],
     ) -> tuple[ComfyUIAutoencoderDTO]:
-        autoencoder_model = handler.create(vae_name)
+        vae_path = folder_paths.get_full_path("vae", vae_name)
+        autoencoder_model = handler.create(vae_path)
         autoencoder_dto = ComfyUIAutoencoderDTO.from_domain(autoencoder_model)
         return (autoencoder_dto,)

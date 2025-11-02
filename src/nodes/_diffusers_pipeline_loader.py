@@ -28,6 +28,7 @@ class DiffusersPipelineLoader:
         checkpoint_name: str,
         handler: PipelineHandler = Provide[Container.pipeline_handler],
     ) -> tuple[ComfyUIPipelineDTO]:
-        pipeline_model = handler.create(checkpoint_name)
+        checkpoint_path = folder_paths.get_full_path("checkpoints", checkpoint_name)
+        pipeline_model = handler.create(checkpoint_path)
         pipeline_dto = ComfyUIPipelineDTO.from_domain(pipeline_model)
         return (pipeline_dto,)
