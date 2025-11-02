@@ -1,7 +1,7 @@
 from ..di import Container
 from ._diffusers_pipeline_loader import DiffusersPipelineLoader
 from ._diffusers_vae_loader import DiffusersVaeLoader
-from .dto import ComfyUIAutoencoderDTO, ComfyUIPipelineDTO
+from .dto import ComfyUIAutoencoderDTO, ComfyUIClipDTO, ComfyUIPipelineDTO
 
 container = Container()
 container.wire(modules=[__name__])
@@ -20,4 +20,5 @@ __all__ = [
     "NODE_DISPLAY_NAME_MAPPINGS",
     "ComfyUIPipelineDTO",
     "ComfyUIAutoencoderDTO",
+    "ComfyUIClipDTO",
 ]
