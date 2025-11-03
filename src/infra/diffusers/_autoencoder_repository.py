@@ -5,6 +5,7 @@ from typing import Any
 import folder_paths  # pyright: ignore[reportMissingImports]
 import requests
 import torch
+from comfy.model_management import get_torch_device  # pyright: ignore[reportMissingImports]
 from diffusers import AutoencoderKL
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
     assign_to_checkpoint,
@@ -22,6 +23,7 @@ from ...domain.repositories import AutoencoderRepository
 class DiffusersAutoencoderRepository(AutoencoderRepository):
     def __init__(self) -> None:
         self.cache_dir = folder_paths.get_temp_directory()
+        self.device = get_torch_device()
 
     # Reference from : https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
     def convert_and_save_from_single_file(self, checkpoint_path: str) -> str:
@@ -38,7 +40,7 @@ class DiffusersAutoencoderRepository(AutoencoderRepository):
             pretrained_model_name_or_path=model_path,
             torch_dtype=dtype,
             cache_dir=self.cache_dir,
-        )
+        ).to(self.device)
         if vae is None:
             raise RuntimeError(f"Failed to load AutoencoderKL from path: {model_path}")
         return vae

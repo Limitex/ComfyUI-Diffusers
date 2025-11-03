@@ -1,6 +1,7 @@
 from ._autoencoder import Autoencoder
 from ._clip import Clip
 from ._conditioning import Conditioning
+from ._image import Image
 from ._pipeline import Pipeline
 
 __all__ = [
@@ -8,4 +9,5 @@ __all__ = [
     "Autoencoder",
     "Clip",
     "Conditioning",
+    "Image",
 ]
