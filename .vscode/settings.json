@@ -28,6 +28,7 @@
         "cloudpickle",
         "codz",
         "colorama",
+        "comfyui",
         "commitizen",
         "commonmark",
         "Connor",
