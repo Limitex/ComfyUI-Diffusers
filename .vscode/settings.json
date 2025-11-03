@@ -104,6 +104,7 @@
         "librosa",
         "Limitex",
         "linkify",
+        "loras",
         "lxml",
         "manylinux",
         "Marimo",
