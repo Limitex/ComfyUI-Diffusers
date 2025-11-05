@@ -1,7 +1,6 @@
 import torch
-from diffusers import StableDiffusionPipeline
 
-from ..domain.model import Image
+from ..domain.model import Autoencoder, Conditioning, Image, Pipeline, Scheduler
 from ..domain.repositories import SamplingRepository
 
 
@@ -12,9 +11,11 @@ class SamplingService:
 
     def sample(
         self,
-        pipeline: StableDiffusionPipeline,
-        positive_embeds: torch.Tensor,
-        negative_embeds: torch.Tensor,
+        pipeline: Pipeline,
+        vae: Autoencoder,
+        scheduler: Scheduler,
+        positive_embeds: Conditioning,
+        negative_embeds: Conditioning,
         width: int,
         height: int,
         steps: int,
@@ -22,7 +23,16 @@ class SamplingService:
         seed: int,
     ) -> list[Image]:
         images = self.sampling_repo.sample(
-            pipeline, positive_embeds, negative_embeds, width, height, steps, cfg, seed
+            pipeline.pipeline,
+            vae.autoencoder,
+            scheduler.scheduler,
+            positive_embeds.conditioning,
+            negative_embeds.conditioning,
+            width,
+            height,
+            steps,
+            cfg,
+            seed,
         )
         if images is None:
             raise RuntimeError("Sampling repository returned no images.")

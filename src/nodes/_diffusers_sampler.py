@@ -2,7 +2,14 @@ from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
 from ..ui import SamplerHandler
-from .dto import ComfyUIConditioningDTO, ComfyUIImage, ComfyUIImageDTO, ComfyUIPipelineDTO
+from .dto import (
+    ComfyUIAutoencoderDTO,
+    ComfyUIConditioningDTO,
+    ComfyUIImage,
+    ComfyUIImageDTO,
+    ComfyUIPipelineDTO,
+    ComfyUISchedulerDTO,
+)
 
 
 class DiffusersSampler:
@@ -16,6 +23,8 @@ class DiffusersSampler:
         return {
             "required": {
                 "pipeline": (ComfyUIPipelineDTO.COMFY_TYPE,),
+                "vae": (ComfyUIAutoencoderDTO.COMFY_TYPE,),
+                "scheduler": (ComfyUISchedulerDTO.COMFY_TYPE,),
                 "positive_embeds": (ComfyUIConditioningDTO.COMFY_TYPE,),
                 "negative_embeds": (ComfyUIConditioningDTO.COMFY_TYPE,),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1.0}),
@@ -37,6 +46,8 @@ class DiffusersSampler:
     def execute(
         self,
         pipeline: ComfyUIPipelineDTO,
+        vae: ComfyUIAutoencoderDTO,
+        scheduler: ComfyUISchedulerDTO,
         positive_embeds: ComfyUIConditioningDTO,
         negative_embeds: ComfyUIConditioningDTO,
         width: int,
@@ -46,10 +57,17 @@ class DiffusersSampler:
         seed: int,
         handler: SamplerHandler = Provide[Container.sampler_handler],
     ) -> tuple[ComfyUIImageDTO]:
+        pipeline_domain = ComfyUIPipelineDTO.to_domain(pipeline)
+        vae_domain = ComfyUIAutoencoderDTO.to_domain(vae)
+        scheduler_domain = ComfyUISchedulerDTO.to_domain(scheduler)
+        positive_embeds_domain = ComfyUIConditioningDTO.to_domain(positive_embeds)
+        negative_embeds_domain = ComfyUIConditioningDTO.to_domain(negative_embeds)
         images_model = handler.sample(
-            pipeline.pipeline,
-            positive_embeds.conditioning,
-            negative_embeds.conditioning,
+            pipeline_domain,
+            vae_domain,
+            scheduler_domain,
+            positive_embeds_domain,
+            negative_embeds_domain,
             width,
             height,
             steps,
