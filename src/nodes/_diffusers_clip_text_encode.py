@@ -29,6 +29,9 @@ class DiffusersClipTextEncode:
         text: str,
         handler: ClipTextEncodeHandler = Provide[Container.clip_text_encode_handler],
     ) -> tuple[ComfyUIConditioningDTO]:
-        conditioning_model = handler.encode(clip.tokenizer, clip.text_encoder, clip.path, text)
+        clip_domain = ComfyUIClipDTO.to_domain(clip)
+        conditioning_model = handler.encode(
+            clip_domain.tokenizer, clip_domain.text_encoder, clip_domain.path, text
+        )
         conditioning_dto = ComfyUIConditioningDTO.from_domain(conditioning_model)
         return (conditioning_dto,)
