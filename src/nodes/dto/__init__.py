@@ -3,6 +3,7 @@ from ._clip import ComfyUIClipDTO
 from ._comfyui import ComfyUIImage, ComfyUIImageDTO
 from ._conditioning_dto import ComfyUIConditioningDTO
 from ._pipeline_dto import ComfyUIPipelineDTO
+from ._scheduler_dto import ComfyUISchedulerDTO
 
 __all__ = [
     "ComfyUIPipelineDTO",
@@ -11,4 +12,5 @@ __all__ = [
     "ComfyUIConditioningDTO",
     "ComfyUIImage",
     "ComfyUIImageDTO",
+    "ComfyUISchedulerDTO",
 ]

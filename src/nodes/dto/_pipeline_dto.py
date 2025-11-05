@@ -54,3 +54,15 @@ class ComfyUIPipelineDTO:
             ComfyUIPipelineDTO instance
         """
         return cls(pipeline=pipeline.pipeline, path=pipeline.path)
+
+    @classmethod
+    def to_domain(cls, dto: "ComfyUIPipelineDTO") -> Pipeline:
+        """Convert DTO back to domain model.
+
+        Args:
+            dto: ComfyUIPipelineDTO instance
+
+        Returns:
+            Pipeline domain model instance
+        """
+        return Pipeline(pipeline=dto.pipeline, path=dto.path)

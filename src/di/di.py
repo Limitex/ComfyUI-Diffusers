@@ -6,10 +6,23 @@ from ..infra.diffusers import (
     DiffusersAutoencoderRepository,
     DiffusersPipelineRepository,
     DiffusersSamplingRepository,
+    DiffusersSchedulerRepository,
     DiffusersTextEncoderRepository,
 )
-from ..service import AutoencoderService, ClipTextEncodeService, PipelineService, SamplingService
-from ..ui import AutoencoderHandler, ClipTextEncodeHandler, PipelineHandler, SamplerHandler
+from ..service import (
+    AutoencoderService,
+    ClipTextEncodeService,
+    PipelineService,
+    SamplingService,
+    SchedulerService,
+)
+from ..ui import (
+    AutoencoderHandler,
+    ClipTextEncodeHandler,
+    PipelineHandler,
+    SamplerHandler,
+    SchedulerHandler,
+)
 
 
 class Container(containers.DeclarativeContainer):
@@ -20,6 +33,7 @@ class Container(containers.DeclarativeContainer):
     autoencoder_repository = providers.Factory(DiffusersAutoencoderRepository)
     text_encoder_repository = providers.Factory(DiffusersTextEncoderRepository)
     sampling_repository = providers.Factory(DiffusersSamplingRepository)
+    scheduler_repository = providers.Factory(DiffusersSchedulerRepository)
 
     # 2. Services
     pipeline_service = providers.Factory(
@@ -38,6 +52,10 @@ class Container(containers.DeclarativeContainer):
         SamplingService,
         sampling_repo=sampling_repository,
     )
+    scheduler_service = providers.Factory(
+        SchedulerService,
+        scheduler_repo=scheduler_repository,
+    )
 
     # 3. Handler
     pipeline_handler = providers.Factory(
@@ -55,4 +73,8 @@ class Container(containers.DeclarativeContainer):
     sampler_handler = providers.Factory(
         SamplerHandler,
         sampling_service=sampling_service,
+    )
+    scheduler_handler = providers.Factory(
+        SchedulerHandler,
+        scheduler_service=scheduler_service,
     )
