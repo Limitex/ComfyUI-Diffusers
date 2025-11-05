@@ -52,3 +52,15 @@ class ComfyUISchedulerDTO:
             ComfyUISchedulerDTO instance
         """
         return cls(scheduler=scheduler.scheduler, path=scheduler.path)
+
+    @classmethod
+    def to_domain(cls, dto: "ComfyUISchedulerDTO") -> Scheduler:
+        """Convert DTO back to domain model.
+
+        Args:
+            dto: ComfyUISchedulerDTO instance
+
+        Returns:
+            Scheduler domain model
+        """
+        return Scheduler(scheduler=dto.scheduler, path=dto.path)

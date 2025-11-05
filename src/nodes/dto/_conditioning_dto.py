@@ -55,3 +55,15 @@ class ComfyUIConditioningDTO:
             ComfyUIConditioningDTO instance
         """
         return cls(conditioning=conditioning.conditioning, path=conditioning.path)
+
+    @classmethod
+    def to_domain(cls, dto: "ComfyUIConditioningDTO") -> Conditioning:
+        """Convert DTO back to domain model.
+
+        Args:
+            dto: ComfyUIConditioningDTO instance
+
+        Returns:
+            Conditioning domain model instance
+        """
+        return Conditioning(conditioning=dto.conditioning, path=dto.path)

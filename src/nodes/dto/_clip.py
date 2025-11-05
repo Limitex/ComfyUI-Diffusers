@@ -58,3 +58,15 @@ class ComfyUIClipDTO:
             ComfyUIClipDTO instance
         """
         return cls(tokenizer=clip.tokenizer, text_encoder=clip.text_encoder, path=clip.path)
+
+    @classmethod
+    def to_domain(cls, dto: "ComfyUIClipDTO") -> "Clip":
+        """Convert DTO back to domain model.
+
+        Args:
+            dto: ComfyUIClipDTO instance
+
+        Returns:
+            Clip domain model
+        """
+        return Clip(tokenizer=dto.tokenizer, text_encoder=dto.text_encoder, path=dto.path)

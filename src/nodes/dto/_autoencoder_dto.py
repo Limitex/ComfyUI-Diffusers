@@ -55,3 +55,15 @@ class ComfyUIAutoencoderDTO:
             ComfyUIAutoencoderDTO instance
         """
         return cls(autoencoder=autoencoder.autoencoder, path=autoencoder.path)
+
+    @classmethod
+    def to_domain(cls, dto: "ComfyUIAutoencoderDTO") -> "Autoencoder":
+        """Convert DTO back to domain model.
+
+        Args:
+            dto: ComfyUIAutoencoderDTO instance
+
+        Returns:
+            Autoencoder domain model
+        """
+        return Autoencoder(autoencoder=dto.autoencoder, path=dto.path)
