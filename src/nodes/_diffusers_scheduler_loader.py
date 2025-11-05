@@ -3,7 +3,7 @@ from dependency_injector.wiring import Provide, inject
 from ..di import Container
 from ..ui import SchedulerHandler
 from .dto import ComfyUIPipelineDTO, ComfyUISchedulerDTO
-from .dto.type import ComfyUISchedulerType
+from .type import ComfyUISchedulerType
 
 
 class DiffusersSchedulerLoader:

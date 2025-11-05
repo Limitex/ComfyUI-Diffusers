@@ -1,4 +1,4 @@
-from ....domain.model import Scheduler
+from ...domain.model import Scheduler
 
 
 class ComfyUISchedulerType:
