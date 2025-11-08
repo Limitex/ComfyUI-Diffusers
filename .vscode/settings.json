@@ -57,6 +57,7 @@
         "distlib",
         "dmypy",
         "docstrings",
+        "dotenv",
         "downsample",
         "downsamplers",
         "dropboxdrivefs",
