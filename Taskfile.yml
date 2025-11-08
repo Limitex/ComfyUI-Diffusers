@@ -137,6 +137,14 @@ tasks:
     cmds:
       - poetry export -f requirements.txt --output requirements-dev.txt --without-hashes --with dev
 
+  lookup:
+    desc: "Check available versions of a package on PyPI (usage: task lookup -- requests)"
+    cmds:
+      - poetry run pip index versions {{.CLI_ARGS}}
+    preconditions:
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task lookup -- requests)"
+
   clean:
     desc: "Clean up cache and temporary files"
     cmds:
