@@ -30,6 +30,11 @@ name = "pytorch-cu124"
 url = "https://download.pytorch.org/whl/cu124"
 priority = "explicit"
 
+[[tool.poetry.source]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+priority = "supplemental"
+
 [tool.poetry.dependencies]
 torch = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
 torchaudio = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
