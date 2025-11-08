@@ -1,14 +1,14 @@
-import folder_paths  # pyright: ignore[reportMissingImports]
 import torch
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
 
 from ...domain.model import Scheduler
 from ...domain.repositories import SchedulerRepository
+from ...utils import get_cache_path
 
 
 class DiffusersSchedulerRepository(SchedulerRepository):
     def __init__(self) -> None:
-        self.cache_dir = folder_paths.get_temp_directory()
+        self.cache_dir = get_cache_path()
 
     def create_scheduler(
         self, model_path: str, dtype: torch.dtype, scheduler_type: Scheduler.Type

@@ -2,7 +2,6 @@ import io
 import os
 from typing import Any
 
-import folder_paths  # pyright: ignore[reportMissingImports]
 import requests
 import torch
 from comfy.model_management import get_torch_device  # pyright: ignore[reportMissingImports]
@@ -18,12 +17,13 @@ from omegaconf import OmegaConf
 from safetensors import safe_open
 
 from ...domain.repositories import AutoencoderRepository
+from ...utils import get_cache_path
 from ._cache import is_vae_cached
 
 
 class DiffusersAutoencoderRepository(AutoencoderRepository):
     def __init__(self) -> None:
-        self.cache_dir = folder_paths.get_temp_directory()
+        self.cache_dir = get_cache_path()
         self.device = get_torch_device()
 
     # Reference from : https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
