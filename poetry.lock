@@ -1903,6 +1903,22 @@ dev = ["pre-commit", "tox"]
 testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
+name = "polygraphy"
+version = "0.47.1"
+description = "Polygraphy: A Deep Learning Inference Prototyping and Debugging Toolkit"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "polygraphy-0.47.1-py2.py3-none-any.whl", hash = "sha256:6e01839686de6852a6544f147e82be8f37f678ec929f31eb0bf6747ffe4a2646"},
+]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.ngc.nvidia.com"
+reference = "ngc"
+
+[[package]]
 name = "pre-commit"
 version = "4.3.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
@@ -3340,4 +3356,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "344541e8a3c431274a7375537bb08d656b7f43ab2f29238254f8a4de831db7a1"
+content-hash = "26533f917997bf4b86912c0ab5c81a77c318c0b7868aa451dde59a606122d43a"
