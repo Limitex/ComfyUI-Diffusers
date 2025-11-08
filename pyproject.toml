@@ -24,6 +24,7 @@ dependencies = [
     "polygraphy (>=0.47.1,<0.48.0)",
     "onnx-graphsurgeon (>=0.3.27,<0.4.0)",
     "numpy (>=1.26.4,<2.0.0)",
+    "huggingface-hub (>=0.25.2,<0.26.0)",
 ]
 
 [tool.poetry]
