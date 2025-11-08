@@ -215,6 +215,12 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Temporary files
+tmp/
+
+# Docker
+docker/
+
 # Hugging Face artifacts
 *.safetensors
 *.vae
@@ -256,5 +262,3 @@ Thumbs.db
 # Development tools config
 .pre-commit-config.yaml
 .commitizenrc
-pyproject.toml
-poetry.lock

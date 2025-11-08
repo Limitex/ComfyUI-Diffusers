@@ -1,6 +1,8 @@
 services:
   comfyui:
-    build: .
+    build: 
+      context: .
+      dockerfile: docker/comfyui/Dockerfile
     container_name: comfyui
     runtime: nvidia
     environment:
@@ -11,15 +13,26 @@ services:
       - POETRY_NO_INTERACTION=1
       - POETRY_CACHE_DIR=/tmp/poetry_cache
     volumes:
-      - ./docker/models/checkpoints:/app/ComfyUI/models/checkpoints
-      - ./docker/models/loras:/app/ComfyUI/models/loras
-      - ./docker/models/vae:/app/ComfyUI/models/vae
-      - ./docker/output:/app/ComfyUI/output
-      - ./docker/workflows:/app/ComfyUI/user/default/workflows
-      - ./docker/tmp:/app/ComfyUI/temp
+      - ./tmp/models/checkpoints:/app/ComfyUI/models/checkpoints
+      - ./tmp/models/loras:/app/ComfyUI/models/loras
+      - ./tmp/models/vae:/app/ComfyUI/models/vae
+      - ./tmp/output:/app/ComfyUI/output
+      - ./tmp/workflows:/app/ComfyUI/user/default/workflows
+      - ./tmp/tmp:/app/ComfyUI/temp
       - .:/app/ComfyUI/custom_nodes/ComfyUI-Diffusers
     ports:
       - "8188:8188"
     restart: unless-stopped
     stdin_open: true
     tty: true
+  
+  dev:
+    build:
+      context: .
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - .:/app
+      - venv_data:/cache/.venv
+
+volumes:
+  venv_data:
