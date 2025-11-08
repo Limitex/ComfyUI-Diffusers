@@ -144,6 +144,14 @@ tasks:
     preconditions:
       - sh: "[ -n '{{.CLI_ARGS}}' ]"
         msg: "CLI_ARGS must be set (e.g., task lookup -- requests)"
+  
+  tree:
+    desc: "Show dependency tree of a package (usage: task tree -- requests)"
+    cmds:
+      - poetry show {{.CLI_ARGS}} --tree 
+    preconditions:
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task tree -- requests)"
 
   clean:
     desc: "Clean up cache and temporary files"
