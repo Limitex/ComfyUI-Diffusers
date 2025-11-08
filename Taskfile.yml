@@ -1,7 +1,9 @@
 version: '3'
 
 vars:
-  PYTHON_DIRS: "src tests"
+  PYTHON_SRC: "src"
+  PYTHON_TESTS: "tests"
+  LINT_TARGETS: "src tests"
 
 tasks:
   default:
@@ -70,43 +72,33 @@ tasks:
   format:
     desc: "Automatically format code using Ruff"
     cmds:
-      - poetry run ruff format {{.PYTHON_DIRS}} __init__.py
-      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py --fix
+      - poetry run ruff format {{.LINT_TARGETS}}
 
   format:check:
-      desc: "Check code formatting without making changes"
-      cmds:
-        - poetry run ruff format {{.PYTHON_DIRS}} __init__.py --check
+    desc: "Check code formatting without making changes"
+    cmds:
+      - poetry run ruff format {{.LINT_TARGETS}} --check
 
   lint:
     desc: "Run linting with ruff"
     cmds:
-      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py
+      - poetry run ruff check {{.LINT_TARGETS}}
 
   lint:fix:
     desc: "Run linting with auto-fix"
     cmds:
-      - poetry run ruff check {{.PYTHON_DIRS}} __init__.py --fix
+      - poetry run ruff check {{.LINT_TARGETS}} --fix
 
   type:
     desc: "Run static type checking using mypy"
     cmds:
-      - poetry run mypy {{.PYTHON_DIRS}} __init__.py
+      - poetry run mypy {{.PYTHON_SRC}}
 
-  test:
-    desc: "Run tests using pytest"
+  fix:
+    desc: "Auto-fix all formatting and linting issues"
     cmds:
-      - poetry run pytest
-
-  test:verbose:
-    desc: "Run tests with verbose output"
-    cmds:
-      - poetry run pytest -v
-
-  test:cov:
-    desc: "Run tests with coverage report"
-    cmds:
-      - poetry run pytest --cov={{.PYTHON_DIRS}} --cov-report=html --cov-report=term
+      - task: format
+      - task: lint:fix
 
   check:
     desc: "Run all checks (format check, lint, type check, and tests)"
@@ -116,14 +108,23 @@ tasks:
       - task: type
       - task: test
 
-  fix:
-    desc: "Auto-fix all formatting and linting issues"
+  test:
+    desc: "Run tests using pytest"
     cmds:
-      - task: format
-      - task: lint:fix
+      - poetry run pytest {{.PYTHON_TESTS}}
+
+  test:verbose:
+    desc: "Run tests with verbose output"
+    cmds:
+      - poetry run pytest -v {{.PYTHON_TESTS}}
+
+  test:cov:
+    desc: "Run tests with coverage report"
+    cmds:
+      - poetry run pytest --cov={{.PYTHON_SRC}} {{.PYTHON_TESTS}} --cov-report=html --cov-report=term
 
   build:
-    desc: "Build sdist (source distribution) and wheel (built distribution)"
+    desc: "Build sdist and wheel"
     cmds:
       - poetry build
 
@@ -137,6 +138,12 @@ tasks:
     cmds:
       - poetry export -f requirements.txt --output requirements-dev.txt --without-hashes --with dev
 
+  export:all:
+    desc: "Export both prod and dev requirements"
+    cmds:
+      - task: export
+      - task: export:dev
+
   lookup:
     desc: "Check available versions of a package on PyPI (usage: task lookup -- requests)"
     cmds:
@@ -144,11 +151,11 @@ tasks:
     preconditions:
       - sh: "[ -n '{{.CLI_ARGS}}' ]"
         msg: "CLI_ARGS must be set (e.g., task lookup -- requests)"
-  
+
   tree:
     desc: "Show dependency tree of a package (usage: task tree -- requests)"
     cmds:
-      - poetry show {{.CLI_ARGS}} --tree 
+      - poetry show {{.CLI_ARGS}} --tree
     preconditions:
       - sh: "[ -n '{{.CLI_ARGS}}' ]"
         msg: "CLI_ARGS must be set (e.g., task tree -- requests)"
