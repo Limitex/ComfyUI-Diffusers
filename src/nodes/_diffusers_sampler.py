@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
-from ..ui import SamplerHandler
+from ..usecase import SamplerUsecase
 from .dto import (
     ComfyUIAutoencoderDTO,
     ComfyUIConditioningDTO,
@@ -55,14 +55,14 @@ class DiffusersSampler:
         steps: int,
         cfg: float,
         seed: int,
-        handler: SamplerHandler = Provide[Container.sampler_handler],
+        usecase: SamplerUsecase = Provide[Container.sampler_usecase],
     ) -> tuple[ComfyUIImageDTO]:
         pipeline_domain = ComfyUIPipelineDTO.to_domain(pipeline)
         vae_domain = ComfyUIAutoencoderDTO.to_domain(vae)
         scheduler_domain = ComfyUISchedulerDTO.to_domain(scheduler)
         positive_embeds_domain = ComfyUIConditioningDTO.to_domain(positive_embeds)
         negative_embeds_domain = ComfyUIConditioningDTO.to_domain(negative_embeds)
-        images_model = handler.sample(
+        images_model = usecase.execute(
             pipeline_domain,
             vae_domain,
             scheduler_domain,

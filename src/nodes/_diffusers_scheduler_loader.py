@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
-from ..ui import SchedulerHandler
+from ..usecase import SchedulerUsecase
 from .dto import ComfyUIPipelineDTO, ComfyUISchedulerDTO
 from .type import ComfyUISchedulerType
 
@@ -28,10 +28,10 @@ class DiffusersSchedulerLoader:
         self,
         pipeline: ComfyUIPipelineDTO,
         scheduler_name: str,
-        handler: SchedulerHandler = Provide[Container.scheduler_handler],
+        usecase: SchedulerUsecase = Provide[Container.scheduler_usecase],
     ) -> tuple[ComfyUISchedulerDTO]:
         domain = ComfyUIPipelineDTO.to_domain(pipeline)
         scheduler_type = ComfyUISchedulerType.to_domain(scheduler_name)
-        scheduler_domain = handler.create(domain, scheduler_type)
+        scheduler_domain = usecase.execute(domain, scheduler_type)
         scheduler_dto = ComfyUISchedulerDTO.from_domain(scheduler_domain)
         return (scheduler_dto,)

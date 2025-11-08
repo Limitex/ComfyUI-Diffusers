@@ -2,7 +2,7 @@ import folder_paths  # pyright: ignore[reportMissingImports]
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
-from ..ui import PipelineHandler
+from ..usecase import PipelineUsecase
 from .dto import ComfyUIClipDTO, ComfyUIPipelineDTO
 
 
@@ -29,10 +29,10 @@ class DiffusersPipelineLoader:
     def execute(
         self,
         checkpoint_name: str,
-        handler: PipelineHandler = Provide[Container.pipeline_handler],
+        usecase: PipelineUsecase = Provide[Container.pipeline_usecase],
     ) -> tuple[ComfyUIPipelineDTO, ComfyUIClipDTO]:
         checkpoint_path = folder_paths.get_full_path("checkpoints", checkpoint_name)
-        pipeline_model, clip_model = handler.create(checkpoint_path)
+        pipeline_model, clip_model = usecase.execute(checkpoint_path)
         pipeline_dto = ComfyUIPipelineDTO.from_domain(pipeline_model)
         clip_dto = ComfyUIClipDTO.from_domain(clip_model)
         return (

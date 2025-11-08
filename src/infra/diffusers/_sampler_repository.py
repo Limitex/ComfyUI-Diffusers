@@ -4,10 +4,10 @@ from diffusers import AutoencoderKL, StableDiffusionPipeline
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 
-from ...domain.repositories import SamplingRepository
+from ...domain.repositories import SamplerRepository
 
 
-class DiffusersSamplingRepository(SamplingRepository):
+class DiffusersSamplerRepository(SamplerRepository):
     def __init__(self) -> None:
         self.device = get_torch_device()
 

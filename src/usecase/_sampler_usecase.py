@@ -1,12 +1,15 @@
+import torch
+
 from ..domain.model import Autoencoder, Conditioning, Image, Pipeline, Scheduler
-from ..service import SamplingService
+from ..domain.repositories import SamplerRepository
 
 
-class SamplerHandler:
-    def __init__(self, sampling_service: SamplingService) -> None:
-        self.sampling_service = sampling_service
+class SamplerUsecase:
+    def __init__(self, sampler_repo: SamplerRepository) -> None:
+        self.sampler_repo = sampler_repo
+        self.dtype = torch.float32
 
-    def sample(
+    def execute(
         self,
         pipeline: Pipeline,
         vae: Autoencoder,
@@ -35,18 +38,20 @@ class SamplerHandler:
             raise ValueError("CFG must be a non-negative float.")
         if seed < 0:
             raise ValueError("Seed must be a non-negative integer.")
-        domain_images = self.sampling_service.sample(
-            pipeline,
-            vae,
-            scheduler,
-            positive_embeds,
-            negative_embeds,
+
+        images = self.sampler_repo.sample(
+            pipeline.pipeline,
+            vae.autoencoder,
+            scheduler.scheduler,
+            positive_embeds.conditioning,
+            negative_embeds.conditioning,
             width,
             height,
             steps,
             cfg,
             seed,
         )
-        if domain_images is None:
-            raise RuntimeError("Failed to sample images from pipeline.")
-        return domain_images
+        if images is None:
+            raise RuntimeError("Sampler repository returned no images.")
+        images_domain: list[Image] = [Image(image=img) for img in images]
+        return images_domain

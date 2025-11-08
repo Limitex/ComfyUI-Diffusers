@@ -30,7 +30,7 @@ class ComfyUISchedulerDTO:
                 return {"required": {"scheduler": (ComfyUISchedulerDTO.COMFY_TYPE,)}}
 
             def execute(self, scheduler: ComfyUISchedulerDTO):
-                # Use the scheduler for sampling operations
+                # Use the scheduler for sampler operations
                 pass
         ```
     """

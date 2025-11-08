@@ -2,7 +2,7 @@ import folder_paths  # pyright: ignore[reportMissingImports]
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
-from ..ui import AutoencoderHandler
+from ..usecase import AutoencoderUsecase
 from .dto import ComfyUIAutoencoderDTO
 
 
@@ -26,9 +26,9 @@ class DiffusersVaeLoader:
     def execute(
         self,
         vae_name: str,
-        handler: AutoencoderHandler = Provide[Container.autoencoder_handler],
+        usecase: AutoencoderUsecase = Provide[Container.autoencoder_usecase],
     ) -> tuple[ComfyUIAutoencoderDTO]:
         vae_path = folder_paths.get_full_path("vae", vae_name)
-        autoencoder_model = handler.create(vae_path)
+        autoencoder_model = usecase.execute(vae_path)
         autoencoder_dto = ComfyUIAutoencoderDTO.from_domain(autoencoder_model)
         return (autoencoder_dto,)

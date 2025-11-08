@@ -6,7 +6,7 @@ from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 
 
-class SamplingRepository(ABC):
+class SamplerRepository(ABC):
     @abstractmethod
     def sample(
         self,
