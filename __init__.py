@@ -1,3 +1,4 @@
+from .src.config import load_envs
 from .src.nodes import (
     NODE_CLASS_MAPPINGS,
     NODE_DISPLAY_NAME_MAPPINGS,
@@ -6,6 +7,8 @@ from .src.nodes import (
     ComfyUIConditioningDTO,
     ComfyUIPipelineDTO,
 )
+
+load_envs()
 
 __all__ = [
     "NODE_CLASS_MAPPINGS",
