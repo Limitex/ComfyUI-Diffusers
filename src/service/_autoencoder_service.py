@@ -12,7 +12,9 @@ class AutoencoderService:
         self.dtype = torch.float32
 
     def create_from_checkpoint(self, checkpoint_full_path: str) -> Autoencoder:
-        path = self.autoencoder_repo.convert_and_save_from_single_file(checkpoint_full_path)
+        path = self.autoencoder_repo.convert_and_save_from_single_file(
+            checkpoint_full_path, self.dtype
+        )
         if not os.path.exists(path):
             raise RuntimeError(f"Failed to convert VAE checkpoint: {checkpoint_full_path}")
 
