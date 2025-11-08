@@ -1695,6 +1695,26 @@ protobuf = ">=3.20.2"
 reference = ["Pillow", "google-re2"]
 
 [[package]]
+name = "onnx-graphsurgeon"
+version = "0.3.27"
+description = "ONNX GraphSurgeon"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "onnx_graphsurgeon-0.3.27-py2.py3-none-any.whl", hash = "sha256:3c49019ece1bdc17bfd626002bc4cab153107b9a2976271aa6f6e50002b9771e"},
+]
+
+[package.dependencies]
+numpy = "*"
+onnx = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.ngc.nvidia.com"
+reference = "ngc"
+
+[[package]]
 name = "onnxruntime"
 version = "1.16.3"
 description = "ONNX Runtime is a runtime accelerator for Machine Learning models"
@@ -3356,4 +3376,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "26533f917997bf4b86912c0ab5c81a77c318c0b7868aa451dde59a606122d43a"
+content-hash = "5c9db578a6dfd1d6e4900e947de2a35149611c2ed2da62f6da7d44e35cff0e01"
