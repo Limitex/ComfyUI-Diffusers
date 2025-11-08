@@ -88,7 +88,7 @@ tasks:
   type:
     desc: "Run static type checking using mypy"
     cmds:
-      - poetry run mypy {{.PYTHON_DIRS}}
+      - poetry run mypy {{.PYTHON_DIRS}} __init__.py
 
   test:
     desc: "Run tests using pytest"
