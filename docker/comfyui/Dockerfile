@@ -12,8 +12,6 @@ RUN apt-get update && \
         git \
         curl \
         build-essential \
-    && curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash \
-    && curl -sSL 'https://install.python-poetry.org' | python - \
     && pip install --no-cache-dir -r requirements.txt \
     && apt-get remove -y build-essential curl \
     && apt-get autoremove -y && \
