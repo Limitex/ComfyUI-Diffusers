@@ -18,6 +18,7 @@ from omegaconf import OmegaConf
 from safetensors import safe_open
 
 from ...domain.repositories import AutoencoderRepository
+from ._cache import is_vae_cached
 
 
 class DiffusersAutoencoderRepository(AutoencoderRepository):
@@ -29,6 +30,10 @@ class DiffusersAutoencoderRepository(AutoencoderRepository):
     def convert_and_save_from_single_file(self, checkpoint_path: str) -> str:
         checkpoint_name = os.path.basename(checkpoint_path)
         ckpt_cache_path = os.path.join(self.cache_dir, checkpoint_name)
+
+        # Check if already cached
+        if is_vae_cached(ckpt_cache_path):
+            return ckpt_cache_path
 
         self._vae_pt_to_vae_diffuser(checkpoint_path, ckpt_cache_path)
         return ckpt_cache_path

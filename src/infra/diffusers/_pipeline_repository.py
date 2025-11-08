@@ -6,6 +6,7 @@ from comfy.model_management import get_torch_device  # pyright: ignore[reportMis
 from diffusers import StableDiffusionPipeline
 
 from ...domain.repositories import PipelineRepository
+from ._cache import is_pipeline_cached
 
 
 class DiffusersPipelineRepository(PipelineRepository):
@@ -16,6 +17,10 @@ class DiffusersPipelineRepository(PipelineRepository):
     def convert_and_save_from_single_file(self, checkpoint_path: str, dtype: torch.dtype) -> str:
         checkpoint_name = os.path.basename(checkpoint_path)
         ckpt_cache_path = os.path.join(self.cache_dir, checkpoint_name)
+
+        # Check if already cached
+        if is_pipeline_cached(ckpt_cache_path):
+            return ckpt_cache_path
 
         StableDiffusionPipeline.from_single_file(
             pretrained_model_link_or_path=checkpoint_path,
