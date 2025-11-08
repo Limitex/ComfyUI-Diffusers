@@ -28,31 +28,31 @@ tasks:
       - task: export
 
   add:
-    desc: "Add a new production dependency (usage: task add PACKAGE=requests)"
+    desc: "Add a new production dependency (usage: task add -- requests)"
     cmds:
-      - poetry add {{.PACKAGE}}
+      - poetry add {{.CLI_ARGS}}
       - task: export
     preconditions:
-      - sh: "[ -n '{{.PACKAGE}}' ]"
-        msg: "PACKAGE variable must be set (e.g., task add PACKAGE=requests)"
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task add -- requests)"
 
   add:dev:
-    desc: "Add a new development dependency (usage: task add:dev PACKAGE=pytest)"
+    desc: "Add a new development dependency (usage: task add:dev -- pytest)"
     cmds:
-      - poetry add {{.PACKAGE}} --group dev
+      - poetry add {{.CLI_ARGS}} --group dev
       - task: export
     preconditions:
-      - sh: "[ -n '{{.PACKAGE}}' ]"
-        msg: "PACKAGE variable must be set (e.g., task add:dev PACKAGE=pytest)"
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task add:dev -- pytest)"
 
   remove:
-    desc: "Remove a dependency (usage: task remove PACKAGE=requests)"
+    desc: "Remove a dependency (usage: task remove -- requests)"
     cmds:
-      - poetry remove {{.PACKAGE}}
+      - poetry remove {{.CLI_ARGS}}
       - task: export
     preconditions:
-      - sh: "[ -n '{{.PACKAGE}}' ]"
-        msg: "PACKAGE variable must be set (e.g., task remove PACKAGE=requests)"
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task remove -- requests)"
 
   shell:
     desc: "Activate the virtual environment shell managed by Poetry"
@@ -63,6 +63,9 @@ tasks:
     desc: "Run a command within the virtual environment (usage: task run -- python main.py)"
     cmds:
       - poetry run {{.CLI_ARGS}}
+    preconditions:
+      - sh: "[ -n '{{.CLI_ARGS}}' ]"
+        msg: "CLI_ARGS must be set (e.g., task run -- python main.py)"
 
   format:
     desc: "Automatically format code using Ruff"
