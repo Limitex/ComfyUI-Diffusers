@@ -29,4 +29,5 @@ class PipelineUsecase:
             text_encoder=pipe.text_encoder,  # type: ignore[attr-defined]
             path=checkpoint_path,
         )
+
         return pipeline, clip

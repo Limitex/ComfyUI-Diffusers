@@ -22,22 +22,14 @@ class SamplerUsecase:
         cfg: float,
         seed: int,
     ) -> list[Image]:
-        if pipeline is None:
-            raise ValueError("Pipeline is None.")
-        if vae is None:
-            raise ValueError("VAE is None.")
-        if scheduler is None:
-            raise ValueError("Scheduler is None.")
-        if positive_embeds is None or negative_embeds is None:
-            raise ValueError("Conditioning embeddings are None.")
         if width <= 0 or height <= 0:
-            raise ValueError("Width and Height must be positive integers.")
+            raise ValueError(f"Invalid dimensions: {width}x{height}")
         if steps <= 0:
-            raise ValueError("Steps must be a positive integer.")
+            raise ValueError(f"Steps must be positive: {steps}")
         if cfg < 0.0:
-            raise ValueError("CFG must be a non-negative float.")
+            raise ValueError(f"CFG must be non-negative: {cfg}")
         if seed < 0:
-            raise ValueError("Seed must be a non-negative integer.")
+            raise ValueError(f"Seed must be non-negative: {seed}")
 
         images = self.sampler_repo.sample(
             pipeline.pipeline,
@@ -54,4 +46,5 @@ class SamplerUsecase:
         if images is None:
             raise RuntimeError("Sampler repository returned no images.")
         images_domain: list[Image] = [Image(image=img) for img in images]
+
         return images_domain

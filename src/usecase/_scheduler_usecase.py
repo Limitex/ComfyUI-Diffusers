@@ -15,7 +15,9 @@ class SchedulerUsecase:
             raise ValueError("Pipeline is None.")
         if not pipeline.path:
             raise ValueError("Invalid pipeline to create scheduler.")
+
         scheduler_obj: SchedulerMixin = self.scheduler_repo.create_scheduler(
             pipeline.path, self.dtype, scheduler_type
         )
+
         return Scheduler(scheduler=scheduler_obj, path=pipeline.path)
