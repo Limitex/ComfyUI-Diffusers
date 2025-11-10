@@ -31,7 +31,10 @@ class DiffusersClipTextEncode:
     ) -> tuple[ComfyUIConditioningDTO]:
         clip_domain = ComfyUIClipDTO.to_domain(clip)
         conditioning_model = usecase.execute(
-            clip_domain.tokenizer, clip_domain.text_encoder, clip_domain.path, text
+            clip_domain.tokenizer,
+            clip_domain.text_encoder,
+            clip_domain.path,
+            text,
         )
         conditioning_dto = ComfyUIConditioningDTO.from_domain(conditioning_model)
         return (conditioning_dto,)

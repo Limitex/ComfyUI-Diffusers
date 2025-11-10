@@ -1,6 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 
 from ..di import Container
+from ..domain.model import CFGScale, ImageSize, Seed, Steps
 from ..usecase import SamplerUsecase
 from .dto import (
     ComfyUIAutoencoderDTO,
@@ -62,17 +63,22 @@ class DiffusersSampler:
         scheduler_domain = ComfyUISchedulerDTO.to_domain(scheduler)
         positive_embeds_domain = ComfyUIConditioningDTO.to_domain(positive_embeds)
         negative_embeds_domain = ComfyUIConditioningDTO.to_domain(negative_embeds)
+
+        image_size = ImageSize(width=width, height=height)
+        steps_vo = Steps(value=steps)
+        cfg_vo = CFGScale(value=cfg)
+        seed_vo = Seed(value=seed)
+
         images_model = usecase.execute(
             pipeline_domain,
             vae_domain,
             scheduler_domain,
             positive_embeds_domain,
             negative_embeds_domain,
-            width,
-            height,
-            steps,
-            cfg,
-            seed,
+            image_size,
+            steps_vo,
+            cfg_vo,
+            seed_vo,
         )
         sampler_dto = ComfyUIImage.from_domains(images_model)
         return (sampler_dto,)

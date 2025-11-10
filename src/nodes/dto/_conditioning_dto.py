@@ -54,7 +54,10 @@ class ComfyUIConditioningDTO:
         Returns:
             ComfyUIConditioningDTO instance
         """
-        return cls(conditioning=conditioning.conditioning, path=conditioning.path)
+        return cls(
+            conditioning=conditioning.conditioning,
+            path=conditioning.path,
+        )
 
     @classmethod
     def to_domain(cls, dto: "ComfyUIConditioningDTO") -> Conditioning:

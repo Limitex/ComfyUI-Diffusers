@@ -5,6 +5,8 @@ from diffusers import AutoencoderKL, StableDiffusionPipeline
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 
+from ..model import CFGScale, ImageSize, Seed, Steps
+
 
 class SamplerRepository(ABC):
     @abstractmethod
@@ -15,10 +17,9 @@ class SamplerRepository(ABC):
         scheduler: SchedulerMixin,
         positive_embeds: torch.Tensor,
         negative_embeds: torch.Tensor,
-        width: int,
-        height: int,
-        steps: int,
-        cfg: float,
-        seed: int,
+        image_size: ImageSize,
+        steps: Steps,
+        cfg: CFGScale,
+        seed: Seed,
     ) -> list[Image.Image]:
         pass

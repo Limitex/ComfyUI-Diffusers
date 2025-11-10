@@ -11,13 +11,10 @@ class SchedulerUsecase:
         self.dtype = torch.float32
 
     def execute(self, pipeline: Pipeline, scheduler_type: Scheduler.Type) -> Scheduler:
-        if pipeline is None or pipeline.pipeline is None:
-            raise ValueError("Pipeline is None.")
-        if not pipeline.path:
-            raise ValueError("Invalid pipeline to create scheduler.")
-
         scheduler_obj: SchedulerMixin = self.scheduler_repo.create_scheduler(
-            pipeline.path, self.dtype, scheduler_type
+            pipeline.path,
+            self.dtype,
+            scheduler_type,
         )
 
         return Scheduler(scheduler=scheduler_obj, path=pipeline.path)

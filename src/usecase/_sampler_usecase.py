@@ -1,6 +1,18 @@
+from __future__ import annotations
+
 import torch
 
-from ..domain.model import Autoencoder, Conditioning, Image, Pipeline, Scheduler
+from ..domain.model import (
+    Autoencoder,
+    CFGScale,
+    Conditioning,
+    Image,
+    ImageSize,
+    Pipeline,
+    Scheduler,
+    Seed,
+    Steps,
+)
 from ..domain.repositories import SamplerRepository
 
 
@@ -16,35 +28,24 @@ class SamplerUsecase:
         scheduler: Scheduler,
         positive_embeds: Conditioning,
         negative_embeds: Conditioning,
-        width: int,
-        height: int,
-        steps: int,
-        cfg: float,
-        seed: int,
+        image_size: ImageSize,
+        steps: Steps,
+        cfg: CFGScale,
+        seed: Seed,
     ) -> list[Image]:
-        if width <= 0 or height <= 0:
-            raise ValueError(f"Invalid dimensions: {width}x{height}")
-        if steps <= 0:
-            raise ValueError(f"Steps must be positive: {steps}")
-        if cfg < 0.0:
-            raise ValueError(f"CFG must be non-negative: {cfg}")
-        if seed < 0:
-            raise ValueError(f"Seed must be non-negative: {seed}")
-
         images = self.sampler_repo.sample(
             pipeline.pipeline,
             vae.autoencoder,
             scheduler.scheduler,
             positive_embeds.conditioning,
             negative_embeds.conditioning,
-            width,
-            height,
+            image_size,
             steps,
             cfg,
             seed,
         )
-        if images is None:
-            raise RuntimeError("Sampler repository returned no images.")
-        images_domain: list[Image] = [Image(image=img) for img in images]
 
-        return images_domain
+        if not images:
+            raise RuntimeError("Sampler repository returned no images.")
+
+        return [Image(image=img) for img in images]

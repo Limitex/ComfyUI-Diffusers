@@ -4,6 +4,7 @@ from diffusers import AutoencoderKL, StableDiffusionPipeline
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 
+from ...domain.model import CFGScale, ImageSize, Seed, Steps
 from ...domain.repositories import SamplerRepository
 
 
@@ -18,22 +19,21 @@ class DiffusersSamplerRepository(SamplerRepository):
         scheduler: SchedulerMixin,
         positive_embeds: torch.Tensor,
         negative_embeds: torch.Tensor,
-        width: int,
-        height: int,
-        steps: int,
-        cfg: float,
-        seed: int,
+        image_size: ImageSize,
+        steps: Steps,
+        cfg: CFGScale,
+        seed: Seed,
     ) -> list[Image.Image]:
         result = pipeline(  # type: ignore[operator]
             prompt_embeds=positive_embeds,
             vae=vae,
             scheduler=scheduler,
-            height=height,
-            width=width,
-            num_inference_steps=steps,
-            guidance_scale=cfg,
+            height=image_size.height,
+            width=image_size.width,
+            num_inference_steps=steps.value,
+            guidance_scale=cfg.value,
             negative_prompt_embeds=negative_embeds,
-            generator=torch.Generator(self.device).manual_seed(seed),
+            generator=torch.Generator(self.device).manual_seed(seed.value),
         )
         images: list[Image.Image] = result.images
         return images

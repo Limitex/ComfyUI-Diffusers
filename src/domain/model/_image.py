@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 
-import PIL.Image
+from PIL import Image as PilImage
 
 
-@dataclass
+@dataclass(frozen=True)
 class Image:
-    image: PIL.Image.Image
+    image: PilImage.Image
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.image, PilImage.Image):
+            raise ValueError(f"Image must be a PIL.Image.Image, got {type(self.image).__name__}")
