@@ -3,7 +3,7 @@ from diffusers.schedulers.scheduling_utils import SchedulerMixin
 
 from ...domain.model import Scheduler
 from ...domain.repositories import SchedulerRepository
-from ...utils import get_cache_path
+from ._cache import get_cache_path
 
 
 class DiffusersSchedulerRepository(SchedulerRepository):

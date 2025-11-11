@@ -5,8 +5,7 @@ from comfy.model_management import get_torch_device  # pyright: ignore[reportMis
 from diffusers import AutoencoderKL
 
 from ...domain.repositories import AutoencoderRepository
-from ...utils import get_cache_path
-from ._cache import is_vae_cached
+from ._cache import get_cache_path, is_vae_cached
 
 
 class DiffusersAutoencoderRepository(AutoencoderRepository):

@@ -5,8 +5,7 @@ from comfy.model_management import get_torch_device  # pyright: ignore[reportMis
 from diffusers import StableDiffusionPipeline
 
 from ...domain.repositories import PipelineRepository
-from ...utils import get_cache_path
-from ._cache import is_pipeline_cached
+from ._cache import get_cache_path, is_pipeline_cached
 
 
 class DiffusersPipelineRepository(PipelineRepository):
