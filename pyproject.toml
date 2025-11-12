@@ -19,6 +19,7 @@ dependencies = [
     "requests (>=2.32.0,<3.0.0)",
     "python-dotenv (>=1.2.1,<2.0.0)",
     "xformers (>=0.0.29.post3,<0.0.30)",
+    "streamdiffusion[tensorrt] @ git+https://github.com/cumulo-autumn/StreamDiffusion.git@b623251dc055e1fd858d53509aa43e09dfc5cdc0",
 ]
 
 [tool.poetry]
