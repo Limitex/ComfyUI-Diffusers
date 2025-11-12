@@ -24,4 +24,4 @@ class ClipTextEncodeUsecase:
         if embeddings is None:
             raise RuntimeError("Failed to generate embeddings.")
 
-        return Conditioning(conditioning=embeddings, path=path)
+        return Conditioning(conditioning=embeddings, path=path, prompt=text)

@@ -16,6 +16,7 @@ class ComfyUIConditioningDTO:
     Attributes:
         conditioning: Tensor representing text embeddings/conditioning
         path: Path to the source model directory
+        prompt: Prompt text that produced the conditioning
 
     Class Attributes:
         COMFY_TYPE: Type name used in ComfyUI's RETURN_TYPES and INPUT_TYPES
@@ -43,6 +44,7 @@ class ComfyUIConditioningDTO:
 
     conditioning: torch.Tensor
     path: str
+    prompt: str
 
     @classmethod
     def from_domain(cls, conditioning: Conditioning) -> "ComfyUIConditioningDTO":
@@ -57,6 +59,7 @@ class ComfyUIConditioningDTO:
         return cls(
             conditioning=conditioning.conditioning,
             path=conditioning.path,
+            prompt=conditioning.prompt,
         )
 
     @classmethod
@@ -69,4 +72,4 @@ class ComfyUIConditioningDTO:
         Returns:
             Conditioning domain model instance
         """
-        return Conditioning(conditioning=dto.conditioning, path=dto.path)
+        return Conditioning(conditioning=dto.conditioning, path=dto.path, prompt=dto.prompt)
