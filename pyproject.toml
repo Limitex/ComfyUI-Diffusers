@@ -3,7 +3,7 @@ name = "ComfyUI-Diffusers"
 version = "0.1.0"
 description = "This repository is a custom node in ComfyUI. This is a program that allows you to use Huggingface Diffusers module with ComfyUI. Additionally, Stream Diffusion is also available."
 authors = [
-    {name = "Limitex", email = "76650151+Limitex@users.noreply.github.com"}
+    { name = "Limitex", email = "76650151+Limitex@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
@@ -21,9 +21,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [
-    {include = "src"}
-]
+packages = [{ include = "src" }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -47,11 +45,7 @@ markers = [
     "integration: Integration tests",
     "slow: Slow tests",
 ]
-filterwarnings = [
-    "error",
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning",
-]
+filterwarnings = ["error", "ignore::UserWarning", "ignore::DeprecationWarning"]
 
 [tool.coverage.run]
 source = ["src"]
@@ -59,7 +53,7 @@ omit = [
     "*/tests/*",
     "*/test_*.py",
     "*/__init__.py",
-    "src/di/*",  # DI container doesn't need test coverage
+    "src/di/*",      # DI container doesn't need test coverage
 ]
 branch = true
 parallel = true
@@ -93,11 +87,33 @@ output = "coverage.xml"
 [tool.bandit]
 exclude_dirs = ["tests", "venv", ".venv", ".tox", "build", "dist"]
 tests = [
-    "B201", "B301", "B302", "B303", "B304", "B305", "B306", "B307",
-    "B308", "B309", "B310", "B311", "B312", "B313", "B314", "B315",
-    "B316", "B317", "B318", "B319", "B320", "B321", "B323", "B324", "B325"
+    "B201",
+    "B301",
+    "B302",
+    "B303",
+    "B304",
+    "B305",
+    "B306",
+    "B307",
+    "B308",
+    "B309",
+    "B310",
+    "B311",
+    "B312",
+    "B313",
+    "B314",
+    "B315",
+    "B316",
+    "B317",
+    "B318",
+    "B319",
+    "B320",
+    "B321",
+    "B323",
+    "B324",
+    "B325",
 ]
-skips = ["B101", "B601"]  # Allow assert in tests & shell=True if needed
+skips = ["B101", "B601"] # Allow assert in tests & shell=True if needed
 
 [tool.bandit.assert_used]
 skips = ["*/test_*.py", "*/*_test.py"]
@@ -109,10 +125,10 @@ root_package = "src"
 name = "Clean Architecture Layers"
 type = "layers"
 layers = [
-    "src.nodes",      # Presentation Layer (ComfyUI Nodes)
-    "src.ui",         # Presentation Layer (Handlers)
-    "src.service",    # Application Layer (Use Cases)
-    "src.domain",     # Domain Layer (Entities & Interfaces)
+    "src.nodes",   # Presentation Layer (ComfyUI Nodes)
+    "src.ui",      # Presentation Layer (Handlers)
+    "src.service", # Application Layer (Use Cases)
+    "src.domain",  # Domain Layer (Entities & Interfaces)
 ]
 containers = ["src"]
 
@@ -132,39 +148,25 @@ forbidden_modules = [
 name = "Application Layer Independence"
 type = "forbidden"
 source_modules = ["src.service"]
-forbidden_modules = [
-    "src.ui",
-    "src.nodes",
-    "src.infra",
-    "src.di",
-]
+forbidden_modules = ["src.ui", "src.nodes", "src.infra", "src.di"]
 
 [[tool.importlinter.contracts]]
 name = "Infrastructure depends only on Domain"
 type = "forbidden"
 source_modules = ["src.infra"]
-forbidden_modules = [
-    "src.service",
-    "src.ui",
-    "src.nodes",
-    "src.di",
-]
+forbidden_modules = ["src.service", "src.ui", "src.nodes", "src.di"]
 
 [[tool.importlinter.contracts]]
 name = "Presentation Layer can use Application & Domain"
 type = "forbidden"
 source_modules = ["src.ui", "src.nodes"]
-forbidden_modules = [
-    "src.infra",
-]
+forbidden_modules = ["src.infra"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "0.1.0"
 tag_format = "v$version"
-version_files = [
-    "pyproject.toml:version"
-]
+version_files = ["pyproject.toml:version"]
 update_changelog_on_bump = true
 changelog_file = "CHANGELOG.md"
 
