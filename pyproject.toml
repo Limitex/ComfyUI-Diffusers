@@ -36,6 +36,11 @@ name = "nvidia"
 url = "https://pypi.nvidia.com"
 priority = "supplemental"
 
+[[tool.poetry.source]]
+name = "ngc"
+url = "https://pypi.ngc.nvidia.com"
+priority = "supplemental"
+
 [tool.poetry.dependencies]
 torch = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
 torchaudio = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
