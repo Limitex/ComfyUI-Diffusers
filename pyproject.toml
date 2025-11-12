@@ -23,6 +23,11 @@ dependencies = [
 [tool.poetry]
 packages = [{ include = "src" }]
 
+[[tool.poetry.source]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "explicit"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
