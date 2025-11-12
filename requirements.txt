@@ -1,3 +1,4 @@
+--extra-index-url https://pypi.nvidia.com
 --extra-index-url https://download.pytorch.org/whl/cu124
 
 accelerate==1.11.0 ; python_version >= "3.10" and python_version < "3.15"
@@ -10,6 +11,7 @@ coloredlogs==15.0.1 ; python_version >= "3.10" and python_version < "3.15"
 cuda-bindings==13.0.3 ; python_version >= "3.10" and python_version < "3.15"
 cuda-pathfinder==1.3.2 ; python_version >= "3.10" and python_version < "3.15"
 cuda-python==13.0.3 ; python_version >= "3.10" and python_version < "3.15"
+cuda-toolkit==13.0.1 ; python_version >= "3.10" and python_version < "3.15"
 dependency-injector==4.48.2 ; python_version >= "3.10" and python_version < "3.15"
 diffusers==0.24.0 ; python_version >= "3.10" and python_version < "3.15"
 filelock==3.20.0 ; python_version >= "3.10" and python_version < "3.15"
@@ -30,6 +32,7 @@ nvidia-cublas-cu12==12.4.5.8 ; python_version >= "3.10" and python_version < "3.
 nvidia-cuda-cupti-cu12==12.4.127 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
 nvidia-cuda-nvrtc-cu12==12.4.127 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
 nvidia-cuda-runtime-cu12==12.4.127 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
+nvidia-cuda-runtime==13.0.88 ; python_version >= "3.10" and python_version < "3.15" and (sys_platform == "linux" or sys_platform == "win32")
 nvidia-cudnn-cu12==9.1.0.70 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
 nvidia-cufft-cu12==11.2.1.3 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
 nvidia-curand-cu12==10.3.5.147 ; python_version >= "3.10" and python_version < "3.15" and platform_system == "Linux" and platform_machine == "x86_64"
@@ -55,6 +58,10 @@ safetensors==0.4.5 ; python_version >= "3.10" and python_version < "3.15"
 setuptools==80.9.0 ; python_version >= "3.12" and python_version < "3.15"
 streamdiffusion @ git+https://github.com/cumulo-autumn/StreamDiffusion.git@b623251dc055e1fd858d53509aa43e09dfc5cdc0 ; python_version >= "3.10" and python_version < "3.15"
 sympy==1.13.1 ; python_version >= "3.10" and python_version < "3.15"
+tensorrt-cu13-bindings==10.14.1.48.post1 ; python_version >= "3.10" and python_version < "3.15"
+tensorrt-cu13-libs==10.14.1.48.post1 ; python_version >= "3.10" and python_version < "3.15"
+tensorrt-cu13==10.14.1.48.post1 ; python_version >= "3.10" and python_version < "3.15"
+tensorrt==10.14.1.48.post1 ; python_version >= "3.10" and python_version < "3.15"
 termcolor==3.2.0 ; python_version >= "3.10" and python_version < "3.15"
 tokenizers==0.22.1 ; python_version >= "3.10" and python_version < "3.15"
 torch==2.6.0+cu124 ; python_version >= "3.10" and python_version < "3.15"

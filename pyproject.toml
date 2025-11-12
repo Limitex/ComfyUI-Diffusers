@@ -20,6 +20,7 @@ dependencies = [
     "python-dotenv (>=1.2.1,<2.0.0)",
     "xformers (>=0.0.29.post3,<0.0.30)",
     "streamdiffusion[tensorrt] @ git+https://github.com/cumulo-autumn/StreamDiffusion.git@b623251dc055e1fd858d53509aa43e09dfc5cdc0",
+    "tensorrt (>=10.14.1.48.post1,<11.0.0.0)",
 ]
 
 [tool.poetry]
@@ -40,6 +41,7 @@ torch = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
 torchaudio = { version = ">=2.6.0,<3.0.0", source = "pytorch-cu124" }
 torchvision = { version = ">=0.21.0,<0.25.0", source = "pytorch-cu124" }
 xformers = { version = ">=0.0.29.post3,<0.0.30", source = "pytorch-cu124" }
+tensorrt = { version = ">=10.14.1.48.post1,<11.0.0.0", source = "nvidia" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
