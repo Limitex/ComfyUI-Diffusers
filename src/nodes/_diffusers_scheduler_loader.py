@@ -3,7 +3,7 @@ from dependency_injector.wiring import Provide, inject
 from ..di import Container
 from ..usecase import SchedulerUsecase
 from .dto import ComfyUIPipelineDTO, ComfyUISchedulerDTO
-from .type import ComfyUISchedulerType
+from .map import SchedulerMap
 
 
 class DiffusersSchedulerLoader:
@@ -15,7 +15,7 @@ class DiffusersSchedulerLoader:
         return {
             "required": {
                 "pipeline": (ComfyUIPipelineDTO.COMFY_TYPE,),
-                "scheduler_name": (list(ComfyUISchedulerType.SCHEDULERS),),
+                "scheduler_name": (SchedulerMap.SCHEDULERS,),
             }
         }
 
@@ -31,7 +31,7 @@ class DiffusersSchedulerLoader:
         usecase: SchedulerUsecase = Provide[Container.scheduler_usecase],
     ) -> tuple[ComfyUISchedulerDTO]:
         domain = ComfyUIPipelineDTO.to_domain(pipeline)
-        scheduler_type = ComfyUISchedulerType.to_domain(scheduler_name)
+        scheduler_type = SchedulerMap.to_domain(scheduler_name)
         scheduler_domain = usecase.execute(domain, scheduler_type)
         scheduler_dto = ComfyUISchedulerDTO.from_domain(scheduler_domain)
         return (scheduler_dto,)
