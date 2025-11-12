@@ -28,8 +28,8 @@ class DiffusersSampler:
                 "scheduler": (ComfyUISchedulerDTO.COMFY_TYPE,),
                 "positive_embeds": (ComfyUIConditioningDTO.COMFY_TYPE,),
                 "negative_embeds": (ComfyUIConditioningDTO.COMFY_TYPE,),
-                "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1.0}),
-                "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1.0}),
+                "width": ("INT", {"default": 512, "min": 8, "max": 8192, "step": 8.0}),
+                "height": ("INT", {"default": 512, "min": 8, "max": 8192, "step": 8.0}),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000, "step": 1.0}),
                 "cfg": (
                     "FLOAT",
