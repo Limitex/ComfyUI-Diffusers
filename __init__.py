@@ -5,8 +5,11 @@ from .src.nodes import (
     ComfyUIAutoencoderDTO,
     ComfyUIClipDTO,
     ComfyUIConditioningDTO,
+    ComfyUILcmLoraDTO,
     ComfyUIPipelineDTO,
     ComfyUISchedulerDTO,
+    ComfyUIStreamDTO,
+    ComfyUIWarmupStreamDTO,
 )
 
 load_envs()
@@ -19,4 +22,7 @@ __all__ = [
     "ComfyUIClipDTO",
     "ComfyUIConditioningDTO",
     "ComfyUISchedulerDTO",
+    "ComfyUILcmLoraDTO",
+    "ComfyUIStreamDTO",
+    "ComfyUIWarmupStreamDTO",
 ]

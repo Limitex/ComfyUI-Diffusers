@@ -1,0 +1,132 @@
+from abc import ABC, abstractmethod
+from typing import Any
+
+from diffusers import StableDiffusionPipeline
+from PIL import Image
+
+from ..model import (
+    CFGScale,
+    CFGType,
+    Delta,
+    FrameBufferSize,
+    ImageSize,
+    NumSamples,
+    Seed,
+    Steps,
+    TIndexList,
+    WarmupCount,
+)
+
+
+class StreamDiffusionRepository(ABC):
+    @abstractmethod
+    def create_stream(
+        self,
+        pipeline: StableDiffusionPipeline,
+        t_index_list: TIndexList,
+        image_size: ImageSize,
+        do_add_noise: bool,
+        use_denoising_batch: bool,
+        frame_buffer_size: FrameBufferSize,
+        cfg_type: CFGType,
+        lcm_lora_weights: dict[str, Any],
+        tiny_vae_name: str,
+        enable_xformers: bool,
+    ) -> Any:
+        """Create a Stream Diffusion stream instance.
+
+        Args:
+            pipeline: StableDiffusionPipeline instance
+            t_index_list: List of timestep indices
+            image_size: Image dimensions
+            do_add_noise: Whether to add noise
+            use_denoising_batch: Whether to use denoising batch
+            frame_buffer_size: Size of frame buffer
+            cfg_type: CFG type configuration
+            lcm_lora_weights: LCM LoRA weights
+            tiny_vae_name: Name of tiny VAE model
+            enable_xformers: Whether to enable xformers memory efficient attention
+
+        Returns:
+            StreamDiffusion instance
+        """
+
+    @abstractmethod
+    def warmup_stream(
+        self,
+        stream: Any,
+        negative_prompt: str,
+        steps: Steps,
+        cfg: CFGScale,
+        delta: Delta,
+        seed: Seed,
+        warmup_count: WarmupCount,
+    ) -> None:
+        """Warm up the stream with given parameters.
+
+        Args:
+            stream: StreamDiffusion instance
+            negative_prompt: Negative prompt text
+            steps: Number of inference steps
+            cfg: CFG scale value
+            delta: Delta value
+            seed: Random seed
+            warmup_count: Number of warmup iterations
+        """
+
+    @abstractmethod
+    def update_prompt(self, stream: Any, prompt: str) -> None:
+        """Update the prompt for the stream.
+
+        Args:
+            stream: StreamDiffusion instance
+            prompt: New prompt text
+        """
+
+    @abstractmethod
+    def sample_txt2img(
+        self,
+        stream: Any,
+        num_samples: NumSamples,
+    ) -> list[Image.Image]:
+        """Generate images using txt2img.
+
+        Args:
+            stream: StreamDiffusion instance
+            num_samples: Number of images to generate
+
+        Returns:
+            List of generated PIL images
+        """
+
+    @abstractmethod
+    def sample_with_images(
+        self,
+        stream: Any,
+        prompt: str,
+        negative_prompt: str,
+        steps: Steps,
+        cfg: CFGScale,
+        delta: Delta,
+        seed: Seed,
+        num_samples: NumSamples,
+        warmup_count: WarmupCount,
+        input_images: list[Image.Image] | None,
+    ) -> list[Image.Image]:
+        """Generate images with optional input images.
+
+        Args:
+            stream: StreamDiffusion instance
+            prompt: Prompt text
+            negative_prompt: Negative prompt text
+            steps: Number of inference steps
+            cfg: CFG scale value
+            delta: Delta value
+            seed: Random seed
+            num_samples: Number of images to generate
+            warmup_count: Number of warmup iterations
+            input_images: Optional list of input images
+
+        Returns:
+            List of generated PIL images
+        """
