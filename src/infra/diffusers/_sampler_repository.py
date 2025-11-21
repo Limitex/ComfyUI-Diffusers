@@ -24,10 +24,10 @@ class DiffusersSamplerRepository(SamplerRepository):
         cfg: CFGScale,
         seed: Seed,
     ) -> list[Image.Image]:
-        result = pipeline(  # type: ignore[operator]
+        pipeline.vae = vae  # type: ignore[attr-defined]
+        pipeline.scheduler = scheduler  # type: ignore[attr-defined]
+        result = pipeline.to(self.device)(  # type: ignore[attr-defined]
             prompt_embeds=positive_embeds,
-            vae=vae,
-            scheduler=scheduler,
             height=image_size.height,
             width=image_size.width,
             num_inference_steps=steps.value,

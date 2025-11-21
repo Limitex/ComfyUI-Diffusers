@@ -36,4 +36,10 @@ class DiffusersPipelineRepository(PipelineRepository):
             torch_dtype=dtype,
             cache_dir=self.cache_dir,
         ).to(self.device)
+        pipe.safety_checker = (  # type: ignore[attr-defined]
+            None
+            if pipe.safety_checker is None  # type: ignore[attr-defined]
+            else lambda images, **_kwargs: (images, [False])
+        )
+        pipe.enable_attention_slicing()  # type: ignore[attr-defined]
         return pipe
