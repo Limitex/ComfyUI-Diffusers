@@ -156,17 +156,18 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
 
         # Generate images
         result: list[Image.Image] = []
-        for _ in range(num_samples.value):
-            x_outputs: list[Any] = []
-            if resized_images is None:
-                x_outputs.append(stream.txt2img())
-            else:
-                stream(resized_images[0])
-                for img in resized_images[1:] + resized_images[-1:]:
-                    x_outputs.append(stream(img))
-
-            for x_output in x_outputs:
+        if resized_images is None:
+            # Text-to-image: Generate num_samples images
+            for _ in range(num_samples.value):
+                x_output = stream.txt2img()
                 image = postprocess_image(x_output, output_type="pil")[0]
                 result.append(image)
+        else:
+            # Image-to-image: Process each input image num_samples times
+            for _ in range(num_samples.value):
+                for img in resized_images:
+                    x_output = stream(img)
+                    image = postprocess_image(x_output, output_type="pil")[0]
+                    result.append(image)
 
         return result
