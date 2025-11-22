@@ -23,6 +23,9 @@ from ...domain.model import (
 from ...domain.repositories import StreamDiffusionRepository
 from ._cache import get_cache_path
 
+LINEAR_NDIM = 2
+CONV_NDIM_THRESHOLD = 3
+
 
 class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
     def __init__(self) -> None:
@@ -48,7 +51,9 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
         # Note: load_lcm_lora() and fuse_lora() modify the pipeline,
         # so we need to copy it to allow reusing the original pipeline in ComfyUI
         pipeline_copy = copy.deepcopy(pipeline)
-        lora_weights_copy = copy.deepcopy(lcm_lora_weights)
+        lora_weights_copy = self._filter_and_reshape_lora_weights(
+            copy.deepcopy(lcm_lora_weights), pipeline_copy
+        )
 
         # Create stream
         stream = StreamDiffusion(
@@ -64,7 +69,12 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
         )
 
         # Load and fuse LCM LoRA
-        stream.load_lcm_lora(lora_weights_copy)
+        # Pass ignore_mismatched_sizes to tolerate conv weight shape differences (e.g., meta tensors)
+        stream.load_lcm_lora(
+            lora_weights_copy,
+            low_cpu_mem_usage=False,
+            ignore_mismatched_sizes=True,
+        )
         stream.fuse_lora()
 
         # Load tiny VAE
@@ -171,3 +181,73 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
                     result.append(image)
 
         return result
+
+    @staticmethod
+    def _filter_and_reshape_lora_weights(
+        lora_weights: dict[str, Any], pipeline: StableDiffusionPipeline
+    ) -> dict[str, Any]:
+        """Keep only compatible LoRA tensors and reshape 2D conv-proj weights as needed."""
+        reshaped: dict[str, Any] = {}
+        # SD1.x UNet channel sizes + text encoder hidden size inform allowed dims
+        allowed_in_dims: set[int] = set(pipeline.unet.config.block_out_channels)  # type: ignore[attr-defined]
+        if hasattr(pipeline.text_encoder.config, "hidden_size"):  # type: ignore[attr-defined]
+            allowed_in_dims.add(pipeline.text_encoder.config.hidden_size)  # type: ignore[attr-defined]
+        # SDXL uses dual text encoders; include second encoder dims when present
+        if hasattr(pipeline, "text_encoder_2") and hasattr(
+            pipeline.text_encoder_2.config, "hidden_size"
+        ):
+            allowed_in_dims.add(pipeline.text_encoder_2.config.hidden_size)
+        # Allow doubled dims for concat projections (e.g., 2560 = 2 * 1280)
+        allowed_conv_in_dims: set[int] = allowed_in_dims.union({c * 2 for c in allowed_in_dims})
+        # Only attention projection convs in UNet (proj_in/proj_out) need 1x1 conv shape.
+        conv_like_markers = ("proj_in", "proj_out")
+
+        # First, copy non-LoRA keys verbatim
+        for key, value in lora_weights.items():
+            # Drop alpha scaling entries to avoid conversion failures
+            if key.endswith(".alpha"):
+                continue
+            if "lora_down.weight" not in key and "lora_up.weight" not in key:
+                reshaped[key] = value
+
+        # Then process LoRA pairs, ensuring both down/up are present and compatible
+        for key, value in lora_weights.items():
+            if not key.endswith("lora_down.weight"):
+                continue
+            up_key = key.replace("lora_down.weight", "lora_up.weight")
+            down_tensor = value
+            up_tensor = lora_weights.get(up_key)
+
+            # Require matching pair
+            if not isinstance(down_tensor, torch.Tensor) or not isinstance(up_tensor, torch.Tensor):
+                continue
+
+            # Drop obviously incompatible LoRA tensors (e.g., SDXL-sized on SD1.5 pipeline)
+            # 2D (linear) uses allowed_in_dims; conv uses allowed_conv_in_dims.
+            if down_tensor.ndim == LINEAR_NDIM and (down_tensor.shape[1] not in allowed_in_dims):
+                continue
+            if up_tensor.ndim == LINEAR_NDIM and (up_tensor.shape[1] not in allowed_in_dims):
+                continue
+            if down_tensor.ndim >= CONV_NDIM_THRESHOLD and (
+                down_tensor.shape[1] not in allowed_conv_in_dims
+            ):
+                continue
+            if up_tensor.ndim >= CONV_NDIM_THRESHOLD and (
+                up_tensor.shape[1] not in allowed_conv_in_dims
+            ):
+                continue
+
+            # Reshape conv-projection weights; keep others as-is
+            if down_tensor.ndim == LINEAR_NDIM and any(
+                marker in key for marker in conv_like_markers
+            ):
+                down_tensor = down_tensor.unsqueeze(-1).unsqueeze(-1)
+            if up_tensor.ndim == LINEAR_NDIM and any(
+                marker in up_key for marker in conv_like_markers
+            ):
+                up_tensor = up_tensor.unsqueeze(-1).unsqueeze(-1)
+
+            reshaped[key] = down_tensor
+            reshaped[up_key] = up_tensor
+
+        return reshaped
