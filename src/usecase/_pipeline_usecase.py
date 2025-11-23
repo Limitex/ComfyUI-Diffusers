@@ -9,7 +9,7 @@ from ..domain.repositories import PipelineRepository
 class PipelineUsecase:
     def __init__(self, pipeline_repo: PipelineRepository) -> None:
         self.pipeline_repo = pipeline_repo
-        self.dtype = torch.float32
+        self.dtype = torch.float16
 
     def execute(self, checkpoint_path: str) -> tuple[Pipeline, Clip]:
         if not os.path.exists(checkpoint_path):

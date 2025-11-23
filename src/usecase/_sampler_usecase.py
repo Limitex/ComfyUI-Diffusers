@@ -19,7 +19,7 @@ from ..domain.repositories import SamplerRepository
 class SamplerUsecase:
     def __init__(self, sampler_repo: SamplerRepository) -> None:
         self.sampler_repo = sampler_repo
-        self.dtype = torch.float32
+        self.dtype = torch.float16
 
     def execute(
         self,

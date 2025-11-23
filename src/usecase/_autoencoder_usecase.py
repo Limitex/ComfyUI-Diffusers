@@ -9,7 +9,7 @@ from ..domain.repositories import AutoencoderRepository
 class AutoencoderUsecase:
     def __init__(self, autoencoder_repo: AutoencoderRepository) -> None:
         self.autoencoder_repo = autoencoder_repo
-        self.dtype = torch.float32
+        self.dtype = torch.float16
 
     def execute(self, vae_path: str) -> Autoencoder:
         if not os.path.exists(vae_path):

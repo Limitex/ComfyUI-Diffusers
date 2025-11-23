@@ -8,7 +8,7 @@ from ..domain.repositories import SchedulerRepository
 class SchedulerUsecase:
     def __init__(self, scheduler_repo: SchedulerRepository) -> None:
         self.scheduler_repo = scheduler_repo
-        self.dtype = torch.float32
+        self.dtype = torch.float16
 
     def execute(self, pipeline: Pipeline, scheduler_type: Scheduler.Type) -> Scheduler:
         scheduler_obj: SchedulerMixin = self.scheduler_repo.create_scheduler(
