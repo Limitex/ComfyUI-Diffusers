@@ -5,7 +5,12 @@ from dependency_injector.wiring import Provide, inject
 from ..di import Container
 from ..domain.model import CFGType, CFGTypeEnum, FrameBufferSize, ImageSize, TIndexList
 from ..usecase import StreamDiffusionCreateStreamUsecase
-from .dto import ComfyUILcmLoraDTO, ComfyUIPipelineDTO, ComfyUIStreamDTO
+from .dto import (
+    ComfyUILcmLoraDTO,
+    ComfyUIPipelineDTO,
+    ComfyUISchedulerDTO,
+    ComfyUIStreamDTO,
+)
 
 NodeInputMap = dict[str, dict[str, tuple[str, ...] | tuple[str | list[str], dict[str, Any]]]]
 
@@ -23,6 +28,7 @@ class StreamDiffusionCreateStream:
         return {
             "required": {
                 "pipeline": (ComfyUIPipelineDTO.COMFY_TYPE,),
+                "scheduler": (ComfyUISchedulerDTO.COMFY_TYPE,),
                 "t_index_list": ("LIST",),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
@@ -44,6 +50,7 @@ class StreamDiffusionCreateStream:
     def execute(
         self,
         pipeline: ComfyUIPipelineDTO,
+        scheduler: ComfyUISchedulerDTO,
         t_index_list: list[int],
         width: int,
         height: int,
@@ -62,6 +69,7 @@ class StreamDiffusionCreateStream:
 
         Args:
             pipeline: Pipeline DTO
+            scheduler: Scheduler DTO
             t_index_list: List of timestep indices
             width: Image width
             height: Image height
@@ -78,6 +86,7 @@ class StreamDiffusionCreateStream:
             Tuple containing ComfyUIStreamDTO
         """
         pipeline_domain = ComfyUIPipelineDTO.to_domain(pipeline)
+        scheduler_domain = ComfyUISchedulerDTO.to_domain(scheduler)
         lcm_lora_domain = ComfyUILcmLoraDTO.to_domain(lcm_lora)
 
         t_index_list_vo = TIndexList(indices=t_index_list)
@@ -87,6 +96,7 @@ class StreamDiffusionCreateStream:
 
         stream = usecase.execute(
             pipeline=pipeline_domain,
+            scheduler=scheduler_domain,
             t_index_list=t_index_list_vo,
             image_size=image_size,
             do_add_noise=do_add_noise,

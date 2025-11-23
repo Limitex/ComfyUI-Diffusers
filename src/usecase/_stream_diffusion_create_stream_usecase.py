@@ -4,6 +4,7 @@ from ..domain.model import (
     ImageSize,
     LcmLora,
     Pipeline,
+    Scheduler,
     StreamDiffusionStream,
     TIndexList,
 )
@@ -17,6 +18,7 @@ class StreamDiffusionCreateStreamUsecase:
     def execute(
         self,
         pipeline: Pipeline,
+        scheduler: Scheduler,
         t_index_list: TIndexList,
         image_size: ImageSize,
         do_add_noise: bool,
@@ -31,6 +33,7 @@ class StreamDiffusionCreateStreamUsecase:
 
         Args:
             pipeline: Pipeline model
+            scheduler: Scheduler model
             t_index_list: List of timestep indices
             image_size: Image dimensions
             do_add_noise: Whether to add noise
@@ -49,6 +52,7 @@ class StreamDiffusionCreateStreamUsecase:
         """
         stream = self.stream_diffusion_repo.create_stream(
             pipeline=pipeline.pipeline,
+            scheduler=scheduler.scheduler,
             t_index_list=t_index_list,
             image_size=image_size,
             do_add_noise=do_add_noise,

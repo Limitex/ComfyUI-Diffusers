@@ -4,6 +4,7 @@ from typing import Any
 import torch
 from comfy.model_management import get_torch_device  # pyright: ignore[reportMissingImports]
 from diffusers import AutoencoderTiny, StableDiffusionPipeline
+from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 from streamdiffusion import StreamDiffusion  # type: ignore[import-untyped]
 from streamdiffusion.image_utils import postprocess_image  # type: ignore[import-untyped]
@@ -36,6 +37,7 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
     def create_stream(
         self,
         pipeline: StableDiffusionPipeline,
+        scheduler: SchedulerMixin,
         t_index_list: TIndexList,
         image_size: ImageSize,
         do_add_noise: bool,
@@ -51,6 +53,7 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
         # Note: load_lcm_lora() and fuse_lora() modify the pipeline,
         # so we need to copy it to allow reusing the original pipeline in ComfyUI
         pipeline_copy = copy.deepcopy(pipeline)
+        pipeline_copy.scheduler = scheduler  # type: ignore[attr-defined]
         lora_weights_copy = self._filter_and_reshape_lora_weights(
             copy.deepcopy(lcm_lora_weights), pipeline_copy
         )

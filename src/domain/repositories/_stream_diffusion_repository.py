@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from diffusers import StableDiffusionPipeline
+from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
 
 from ..model import (
@@ -23,6 +24,7 @@ class StreamDiffusionRepository(ABC):
     def create_stream(
         self,
         pipeline: StableDiffusionPipeline,
+        scheduler: SchedulerMixin,
         t_index_list: TIndexList,
         image_size: ImageSize,
         do_add_noise: bool,
@@ -37,6 +39,7 @@ class StreamDiffusionRepository(ABC):
 
         Args:
             pipeline: StableDiffusionPipeline instance
+            scheduler: Scheduler to attach to the pipeline
             t_index_list: List of timestep indices
             image_size: Image dimensions
             do_add_noise: Whether to add noise
