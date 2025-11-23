@@ -48,12 +48,8 @@ class StreamDiffusionSampleUsecase:
         Raises:
             RuntimeError: If sampling fails
         """
-        # Convert domain images to PIL images if provided
-        pil_images = None
-        if input_images is not None:
-            pil_images = [img.image for img in input_images]
-
-        images = self.stream_diffusion_repo.sample_with_images(
+        # Prepare stream with parameters
+        self.stream_diffusion_repo.prepare_stream(
             stream=stream.stream,
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -61,10 +57,30 @@ class StreamDiffusionSampleUsecase:
             cfg=cfg,
             delta=delta,
             seed=seed,
-            num_samples=num_samples,
-            warmup_count=warmup_count,
-            input_images=pil_images,
         )
+
+        # Warmup
+        self.stream_diffusion_repo.warmup_stream(
+            stream=stream.stream,
+            warmup_count=warmup_count,
+        )
+
+        # Convert domain images to PIL images if provided
+        pil_images = None
+        if input_images is not None:
+            pil_images = [img.image for img in input_images]
+
+        if pil_images:
+            images = self.stream_diffusion_repo.sample_with_images(
+                stream=stream.stream,
+                num_samples=num_samples,
+                input_images=pil_images,
+            )
+        else:
+            images = self.stream_diffusion_repo.sample_txt2img(
+                stream=stream.stream,
+                num_samples=num_samples,
+            )
 
         if not images:
             raise RuntimeError("Stream Diffusion repository returned no images")

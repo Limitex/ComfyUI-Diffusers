@@ -30,13 +30,20 @@ class StreamDiffusionWarmupUsecase:
         Returns:
             Warmed up StreamDiffusionStream (same instance)
         """
-        self.stream_diffusion_repo.warmup_stream(
+        # Prepare stream with parameters
+        self.stream_diffusion_repo.prepare_stream(
             stream=stream.stream,
+            prompt="",
             negative_prompt=negative_prompt,
             steps=steps,
             cfg=cfg,
             delta=delta,
             seed=seed,
+        )
+
+        # Warmup
+        self.stream_diffusion_repo.warmup_stream(
+            stream=stream.stream,
             warmup_count=warmup_count,
         )
 

@@ -91,25 +91,31 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
     def warmup_stream(
         self,
         stream: Any,
+        warmup_count: WarmupCount,
+    ) -> None:
+        """Warm up the stream with given parameters."""
+        for _ in range(warmup_count.value):
+            stream()
+
+    def prepare_stream(
+        self,
+        stream: Any,
+        prompt: str,
         negative_prompt: str,
         steps: Steps,
         cfg: CFGScale,
         delta: Delta,
         seed: Seed,
-        warmup_count: WarmupCount,
     ) -> None:
-        """Warm up the stream with given parameters."""
+        """Prepare the stream with given parameters."""
         stream.prepare(
-            prompt="",
+            prompt=prompt,
             negative_prompt=negative_prompt,
             num_inference_steps=steps.value,
             guidance_scale=cfg.value,
             delta=delta.value,
             seed=seed.value,
         )
-
-        for _ in range(warmup_count.value):
-            stream()
 
     def update_prompt(self, stream: Any, prompt: str) -> None:
         """Update the prompt for the stream."""
@@ -131,36 +137,15 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
     def sample_with_images(
         self,
         stream: Any,
-        prompt: str,
-        negative_prompt: str,
-        steps: Steps,
-        cfg: CFGScale,
-        delta: Delta,
-        seed: Seed,
         num_samples: NumSamples,
-        warmup_count: WarmupCount,
         input_images: list[Image.Image] | None,
     ) -> list[Image.Image]:
         """Generate images with optional input images."""
-        # Prepare stream
-        stream.prepare(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            num_inference_steps=steps.value,
-            guidance_scale=cfg.value,
-            delta=delta.value,
-            seed=seed.value,
-        )
-
         # Resize input images if provided
         if input_images is not None:
             resized_images = [img.resize((stream.width, stream.height)) for img in input_images]
         else:
             resized_images = None
-
-        # Warmup
-        for _ in range(warmup_count.value):
-            stream()
 
         # Generate images
         result: list[Image.Image] = []

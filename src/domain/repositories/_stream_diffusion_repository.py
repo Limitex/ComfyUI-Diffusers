@@ -58,23 +58,36 @@ class StreamDiffusionRepository(ABC):
     def warmup_stream(
         self,
         stream: Any,
-        negative_prompt: str,
-        steps: Steps,
-        cfg: CFGScale,
-        delta: Delta,
-        seed: Seed,
         warmup_count: WarmupCount,
     ) -> None:
         """Warm up the stream with given parameters.
 
         Args:
             stream: StreamDiffusion instance
+            warmup_count: Number of warmup iterations
+        """
+
+    @abstractmethod
+    def prepare_stream(
+        self,
+        stream: Any,
+        prompt: str,
+        negative_prompt: str,
+        steps: Steps,
+        cfg: CFGScale,
+        delta: Delta,
+        seed: Seed,
+    ) -> None:
+        """Prepare the stream with given parameters.
+
+        Args:
+            stream: StreamDiffusion instance
+            prompt: Prompt text
             negative_prompt: Negative prompt text
             steps: Number of inference steps
             cfg: CFG scale value
             delta: Delta value
             seed: Random seed
-            warmup_count: Number of warmup iterations
         """
 
     @abstractmethod
@@ -106,28 +119,14 @@ class StreamDiffusionRepository(ABC):
     def sample_with_images(
         self,
         stream: Any,
-        prompt: str,
-        negative_prompt: str,
-        steps: Steps,
-        cfg: CFGScale,
-        delta: Delta,
-        seed: Seed,
         num_samples: NumSamples,
-        warmup_count: WarmupCount,
         input_images: list[Image.Image] | None,
     ) -> list[Image.Image]:
         """Generate images with optional input images.
 
         Args:
             stream: StreamDiffusion instance
-            prompt: Prompt text
-            negative_prompt: Negative prompt text
-            steps: Number of inference steps
-            cfg: CFG scale value
-            delta: Delta value
-            seed: Random seed
             num_samples: Number of images to generate
-            warmup_count: Number of warmup iterations
             input_images: Optional list of input images
 
         Returns:
