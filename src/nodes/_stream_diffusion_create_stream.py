@@ -38,7 +38,7 @@ class StreamDiffusionCreateStream:
                 "cfg_type": (["none", "full", "self", "initialize"], {"default": "none"}),
                 "lcm_lora": (ComfyUILcmLoraDTO.COMFY_TYPE,),
                 "tiny_vae": ("STRING", {"default": "madebyollin/taesd"}),
-                "enable_xformers": ("BOOLEAN", {"default": False}),
+                "enable_xformers": ("BOOLEAN", {"default": True}),
             },
         }
 
