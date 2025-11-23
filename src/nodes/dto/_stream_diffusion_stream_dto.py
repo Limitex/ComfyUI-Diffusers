@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, ClassVar
+from typing import ClassVar
+
+from streamdiffusion import StreamDiffusion  # type: ignore[import-untyped]
 
 from ...domain.model import StreamDiffusionStream
 
@@ -17,7 +19,7 @@ class ComfyUIStreamDTO:
 
     COMFY_TYPE: ClassVar[str] = "DIFFUSERS_STREAM"
 
-    stream: Any
+    stream: StreamDiffusion
 
     @classmethod
     def from_domain(cls, stream: StreamDiffusionStream) -> "ComfyUIStreamDTO":
@@ -59,7 +61,7 @@ class ComfyUIWarmupStreamDTO:
 
     COMFY_TYPE: ClassVar[str] = "DIFFUSERS_WARMUP_STREAM"
 
-    stream: Any
+    stream: StreamDiffusion
 
     @classmethod
     def from_domain(cls, stream: StreamDiffusionStream) -> "ComfyUIWarmupStreamDTO":

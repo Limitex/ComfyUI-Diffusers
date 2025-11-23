@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
+import torch
 from diffusers import StableDiffusionPipeline
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
 from PIL import Image
+from streamdiffusion import StreamDiffusion  # type: ignore[import-untyped]
 
 from ..model import (
     CFGScale,
@@ -31,10 +32,10 @@ class StreamDiffusionRepository(ABC):
         use_denoising_batch: bool,
         frame_buffer_size: FrameBufferSize,
         cfg_type: CFGType,
-        lcm_lora_weights: dict[str, Any],
+        lcm_lora_weights: dict[str, torch.Tensor],
         tiny_vae_name: str,
         enable_xformers: bool,
-    ) -> Any:
+    ) -> StreamDiffusion:
         """Create a Stream Diffusion stream instance.
 
         Args:
@@ -57,7 +58,7 @@ class StreamDiffusionRepository(ABC):
     @abstractmethod
     def warmup_stream(
         self,
-        stream: Any,
+        stream: StreamDiffusion,
         warmup_count: WarmupCount,
         input_image: Image.Image | None = None,
     ) -> None:
@@ -72,7 +73,7 @@ class StreamDiffusionRepository(ABC):
     @abstractmethod
     def prepare_stream(
         self,
-        stream: Any,
+        stream: StreamDiffusion,
         prompt: str,
         negative_prompt: str,
         steps: Steps,
@@ -93,7 +94,7 @@ class StreamDiffusionRepository(ABC):
         """
 
     @abstractmethod
-    def update_prompt(self, stream: Any, prompt: str) -> None:
+    def update_prompt(self, stream: StreamDiffusion, prompt: str) -> None:
         """Update the prompt for the stream.
 
         Args:
@@ -104,7 +105,7 @@ class StreamDiffusionRepository(ABC):
     @abstractmethod
     def sample_txt2img(
         self,
-        stream: Any,
+        stream: StreamDiffusion,
         num_samples: NumSamples,
     ) -> list[Image.Image]:
         """Generate images using txt2img.
@@ -120,7 +121,7 @@ class StreamDiffusionRepository(ABC):
     @abstractmethod
     def sample_with_images(
         self,
-        stream: Any,
+        stream: StreamDiffusion,
         num_samples: NumSamples,
         input_images: list[Image.Image] | None,
     ) -> list[Image.Image]:

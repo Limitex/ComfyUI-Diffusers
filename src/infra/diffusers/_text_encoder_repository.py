@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import torch
 from comfy.model_management import get_torch_device  # pyright: ignore[reportMissingImports]
 from transformers import CLIPTextModel, CLIPTokenizer
@@ -35,7 +33,7 @@ class DiffusersTextEncoderRepository(TextEncoderRepository):
         with torch.no_grad():
             for i in range(0, text_ids.shape[-1], max_length):
                 segment_ids = text_ids[:, i : i + max_length]
-                outputs: Any = text_encoder(segment_ids)
+                outputs = text_encoder(segment_ids)
                 if hasattr(outputs, "last_hidden_state"):
                     embeds = outputs.last_hidden_state
                 else:

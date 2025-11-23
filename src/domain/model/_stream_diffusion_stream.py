@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import Any
+
+from streamdiffusion import StreamDiffusion  # type: ignore[import-untyped]
 
 
 @dataclass(frozen=True)
 class StreamDiffusionStream:
     """Stream Diffusion stream instance."""
 
-    stream: Any  # StreamDiffusion instance from streamdiffusion library
+    stream: StreamDiffusion
 
     def __post_init__(self) -> None:
         if self.stream is None:
