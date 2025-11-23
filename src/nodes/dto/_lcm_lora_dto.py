@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, ClassVar
+from typing import ClassVar
+
+import torch
 
 from ...domain.model import LcmLora
 
@@ -17,7 +19,7 @@ class ComfyUILcmLoraDTO:
 
     COMFY_TYPE: ClassVar[str] = "DIFFUSERS_LCM_LORA"
 
-    weights: dict[str, Any]
+    weights: dict[str, torch.Tensor]
 
     @classmethod
     def from_domain(cls, lcm_lora: LcmLora) -> "ComfyUILcmLoraDTO":

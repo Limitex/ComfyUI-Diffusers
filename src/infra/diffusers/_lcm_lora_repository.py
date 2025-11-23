@@ -1,12 +1,11 @@
-from typing import Any
-
+import torch
 from safetensors.torch import load_file
 
 from ...domain.repositories import LcmLoraRepository
 
 
 class DiffusersLcmLoraRepository(LcmLoraRepository):
-    def load_lcm_lora(self, lora_path: str) -> dict[str, Any]:
+    def load_lcm_lora(self, lora_path: str) -> dict[str, torch.Tensor]:
         """Load LCM LoRA weights from safetensors file.
 
         Args:

@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import Any
+
+import torch
 
 
 @dataclass(frozen=True)
 class LcmLora:
     """LCM LoRA weights for Stream Diffusion."""
 
-    weights: dict[str, Any]
+    weights: dict[str, torch.Tensor]
 
     def __post_init__(self) -> None:
         if not isinstance(self.weights, dict):

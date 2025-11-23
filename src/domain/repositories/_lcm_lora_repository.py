@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Any
+
+import torch
 
 
 class LcmLoraRepository(ABC):
     @abstractmethod
-    def load_lcm_lora(self, lora_path: str) -> dict[str, Any]:
+    def load_lcm_lora(self, lora_path: str) -> dict[str, torch.Tensor]:
         """Load LCM LoRA weights from file.
 
         Args:
