@@ -41,10 +41,11 @@ class StreamDiffusionWarmupUsecase:
             seed=seed,
         )
 
-        # Warmup
+        # Warmup (txt2img mode - no input image)
         self.stream_diffusion_repo.warmup_stream(
             stream=stream.stream,
             warmup_count=warmup_count,
+            input_image=None,
         )
 
         return stream

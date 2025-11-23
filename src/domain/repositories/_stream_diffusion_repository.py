@@ -59,12 +59,14 @@ class StreamDiffusionRepository(ABC):
         self,
         stream: Any,
         warmup_count: WarmupCount,
+        input_image: Image.Image | None = None,
     ) -> None:
         """Warm up the stream with given parameters.
 
         Args:
             stream: StreamDiffusion instance
             warmup_count: Number of warmup iterations
+            input_image: Optional input image for img2img warmup
         """
 
     @abstractmethod

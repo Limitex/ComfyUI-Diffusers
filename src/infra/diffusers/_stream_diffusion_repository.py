@@ -92,10 +92,17 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
         self,
         stream: Any,
         warmup_count: WarmupCount,
+        input_image: Image.Image | None = None,
     ) -> None:
         """Warm up the stream with given parameters."""
-        for _ in range(warmup_count.value):
-            stream()
+        if input_image is not None:
+            # Resize input image to match stream dimensions
+            resized_image = input_image.resize((stream.width, stream.height))
+            for _ in range(warmup_count.value):
+                stream(resized_image)
+        else:
+            for _ in range(warmup_count.value):
+                stream()
 
     def prepare_stream(
         self,
@@ -114,6 +121,7 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
             num_inference_steps=steps.value,
             guidance_scale=cfg.value,
             delta=delta.value,
+            generator=torch.Generator().manual_seed(seed.value),
             seed=seed.value,
         )
 

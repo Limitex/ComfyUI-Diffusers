@@ -59,16 +59,19 @@ class StreamDiffusionSampleUsecase:
             seed=seed,
         )
 
-        # Warmup
+        # Convert domain images to PIL images if provided
+        pil_images = None
+        warmup_image = None
+        if input_images is not None:
+            pil_images = [img.image for img in input_images]
+            # Use first image for warmup (img2img mode)
+            warmup_image = pil_images[0] if pil_images else None
+
         self.stream_diffusion_repo.warmup_stream(
             stream=stream.stream,
             warmup_count=warmup_count,
+            input_image=warmup_image,
         )
-
-        # Convert domain images to PIL images if provided
-        pil_images = None
-        if input_images is not None:
-            pil_images = [img.image for img in input_images]
 
         if pil_images:
             images = self.stream_diffusion_repo.sample_with_images(
