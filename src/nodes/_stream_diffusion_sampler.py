@@ -32,7 +32,7 @@ class StreamDiffusionSampler:
                 "delta": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),
                 "num": ("INT", {"default": 1, "min": 1, "max": 10000}),
-                "warmup": ("INT", {"default": 1, "min": 0, "max": 10000}),
+                "warmup": ("INT", {"default": 10, "min": 0, "max": 10000}),
             },
             "optional": {
                 "image": (ComfyUIImage.COMFY_TYPE,),
