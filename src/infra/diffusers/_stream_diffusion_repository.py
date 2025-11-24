@@ -55,7 +55,7 @@ class DiffusersStreamDiffusionRepository(StreamDiffusionRepository):
         # Create stream
         stream = StreamDiffusion(
             pipe=pipeline_copy,
-            t_index_list=t_index_list.indices,
+            t_index_list=t_index_list.as_list(),
             torch_dtype=self.dtype,
             width=image_size.width,
             height=image_size.height,

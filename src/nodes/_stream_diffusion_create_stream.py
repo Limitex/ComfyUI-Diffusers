@@ -29,7 +29,7 @@ class StreamDiffusionCreateStream:
             "required": {
                 "pipeline": (ComfyUIPipelineDTO.COMFY_TYPE,),
                 "scheduler": (ComfyUISchedulerDTO.COMFY_TYPE,),
-                "t_index_list": ("LIST",),
+                "t_index_list": ("STRING", {"default": "[0, 16, 32, 45]"}),
                 "width": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "height": ("INT", {"default": 512, "min": 1, "max": 8192, "step": 1}),
                 "do_add_noise": ("BOOLEAN", {"default": True}),
@@ -51,7 +51,7 @@ class StreamDiffusionCreateStream:
         self,
         pipeline: ComfyUIPipelineDTO,
         scheduler: ComfyUISchedulerDTO,
-        t_index_list: list[int],
+        t_index_list: str,
         width: int,
         height: int,
         do_add_noise: bool,
@@ -70,7 +70,7 @@ class StreamDiffusionCreateStream:
         Args:
             pipeline: Pipeline DTO
             scheduler: Scheduler DTO
-            t_index_list: List of timestep indices
+            t_index_list: JSON array string of timestep indices
             width: Image width
             height: Image height
             do_add_noise: Whether to add noise
@@ -89,7 +89,7 @@ class StreamDiffusionCreateStream:
         scheduler_domain = ComfyUISchedulerDTO.to_domain(scheduler)
         lcm_lora_domain = ComfyUILcmLoraDTO.to_domain(lcm_lora)
 
-        t_index_list_vo = TIndexList(indices=t_index_list)
+        t_index_list_vo = TIndexList(raw_value=t_index_list)
         image_size = ImageSize(width=width, height=height)
         frame_buffer_size_vo = FrameBufferSize(value=frame_buffer_size)
         cfg_type_vo = CFGType(value=CFGTypeEnum(cfg_type))
