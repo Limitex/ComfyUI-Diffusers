@@ -7,7 +7,7 @@ from PIL import Image as PilImage
 from ..di import Container
 from ..domain.model import CFGScale, Delta, Image, NumSamples, Seed, Steps, WarmupCount
 from ..usecase import StreamDiffusionSampleUsecase
-from .dto import ComfyUIImage, ComfyUIImageDTO, ComfyUIStreamDTO
+from .dto import ComfyUIConditioningDTO, ComfyUIImage, ComfyUIImageDTO, ComfyUIStreamDTO
 
 NodeInputMap = dict[str, dict[str, tuple[str, ...] | tuple[str | list[str], dict[str, Any]]]]
 
@@ -25,8 +25,8 @@ class StreamDiffusionSampler:
         return {
             "required": {
                 "stream": (ComfyUIStreamDTO.COMFY_TYPE,),
-                "positive_prompt": ("STRING", {"multiline": True}),
-                "negative_prompt": ("STRING", {"multiline": True, "default": ""}),
+                "positive_conditioning": (ComfyUIConditioningDTO.COMFY_TYPE,),
+                "negative_conditioning": (ComfyUIConditioningDTO.COMFY_TYPE,),
                 "steps": ("INT", {"default": 50, "min": 1, "max": 10000}),
                 "cfg": ("FLOAT", {"default": 1.2, "min": 0.0, "max": 100.0}),
                 "delta": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0}),
@@ -47,8 +47,8 @@ class StreamDiffusionSampler:
     def execute(
         self,
         stream: ComfyUIStreamDTO,
-        positive_prompt: str,
-        negative_prompt: str,
+        positive_conditioning: ComfyUIConditioningDTO,
+        negative_conditioning: ComfyUIConditioningDTO,
         steps: int,
         cfg: float,
         delta: float,
@@ -62,8 +62,8 @@ class StreamDiffusionSampler:
 
         Args:
             stream: Stream DTO
-            positive_prompt: Prompt text
-            negative_prompt: Negative prompt text
+            positive_conditioning: Positive conditioning from CLIP Text Encode
+            negative_conditioning: Negative conditioning from CLIP Text Encode
             steps: Number of inference steps
             cfg: CFG scale value
             delta: Delta value
@@ -77,6 +77,9 @@ class StreamDiffusionSampler:
             Tuple containing image tensor
         """
         stream_domain = ComfyUIStreamDTO.to_domain(stream)
+
+        positive_prompt = positive_conditioning.prompt
+        negative_prompt = negative_conditioning.prompt
 
         steps_vo = Steps(value=steps)
         cfg_vo = CFGScale(value=cfg)
